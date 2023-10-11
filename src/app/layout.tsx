@@ -10,9 +10,10 @@ export const metadata: Metadata = {
   // giffer
   // gipher
   // GIF Factory
-  // GIF Migic
-  title: 'AI GIF Genie 🧞',
-  description: 'AI GIF Genie 🧞',
+  // GIF Magic
+  // AI GIF Genie
+  title: 'Hotshot-XL Text-to-GIF 🧞',
+  description: 'Hotshot-XL Text-to-GIF 🧞',
 }
 
 export default function RootLayout({

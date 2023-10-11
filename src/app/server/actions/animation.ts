@@ -54,35 +54,36 @@ export async function generateAnimation({
 
       return content
     } else if (videoEngine === "VIDEO_HOTSHOT_XL_API_FFFILONI") {
-      const res = await fetch(jbilckeApi, {
+      const res = await fetch(fffiloniApi + "api/predict", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           // access isn't secured for now, the free lunch is open
           // Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify([
-          0,
-          prompt,
-          // lora, // not supported
-          // size,
-        ]),
+        body: JSON.stringify({
+          fn_index: 0,
+          data: [
+            prompt,
+            // lora, // not supported
+            // size, // not supported
+          ],
+        }),
         cache: "no-store",
         // we can also use this (see https://vercel.com/blog/vercel-cache-api-nextjs-cache)
         // next: { revalidate: 1 }
       })
-      console.log("res:", res)
 
-      const content = await res.text()
-      console.log("content:", content)
+      const { data } = await res.json()
 
       // Recommendation: handle errors
       if (res.status !== 200) {
-        console.error(content)
         // This will activate the closest `error.js` Error Boundary
         throw new Error('Failed to fetch data')
       }
+      // console.log("data:", data.slice(0, 50))
 
+      return data
     } else {
       throw new Error(`not implemented yet!`)
     }

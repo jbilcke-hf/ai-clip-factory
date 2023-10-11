@@ -20,6 +20,7 @@ export default function Page() {
       </Head>
       <main className={cn(
         `light text-cyan-900`,
+        // `bg-gradient-to-r from-green-500 to-yellow-400`,
         `bg-gradient-to-r from-cyan-500 to-blue-400`,
         )}>
         {isLoaded && <Main />}
