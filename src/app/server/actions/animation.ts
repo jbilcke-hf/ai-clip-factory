@@ -2,7 +2,11 @@
 
 import { ImageInferenceSize } from "@/types"
 
-const hotshotApiUrl = `${process.env.HF_HOTSHOT_XL_API_URL || ""}`
+const videoEngine = `${process.env.VIDEO_ENGINE || ""}`
+
+const officialApi = `${process.env.VIDEO_HOTSHOT_XL_API_OFFICIAL || ""}`
+const jbilckeApi = `${process.env.VIDEO_HOTSHOT_XL_API_JBILCKE || ""}`
+const fffiloniApi = `${process.env.VIDEO_HOTSHOT_XL_API_FFFILONI || ""}`
 
 export async function generateAnimation({
   prompt,
@@ -18,7 +22,9 @@ export async function generateAnimation({
   }
 
   try {
-    const res = await fetch(hotshotApiUrl, {
+    // TODO: support other API to avoid duplicate work?
+    // (are the other API supporting custom LoRAs?)
+    const res = await fetch(jbilckeApi, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
