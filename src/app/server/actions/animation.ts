@@ -5,8 +5,8 @@ import { ImageInferenceSize } from "@/types"
 const videoEngine = `${process.env.VIDEO_ENGINE || ""}`
 
 const officialApi = `${process.env.VIDEO_HOTSHOT_XL_API_OFFICIAL || ""}`
-const jbilckeApi = `${process.env.VIDEO_HOTSHOT_XL_API_JBILCKE || ""}`
-const fffiloniApi = `${process.env.VIDEO_HOTSHOT_XL_API_FFFILONI || ""}`
+const nodeApi = `${process.env.VIDEO_HOTSHOT_XL_API_NODE || ""}`
+const gradioApi = `${process.env.VIDEO_HOTSHOT_XL_API_GRADIO || ""}`
 
 export async function generateAnimation({
   prompt,
@@ -23,10 +23,10 @@ export async function generateAnimation({
 
   try {
 
-    if (videoEngine === "VIDEO_HOTSHOT_XL_API_JBILCKE") {
+    if (videoEngine === "VIDEO_HOTSHOT_XL_API_NODE") {
       // TODO: support other API to avoid duplicate work?
       // (are the other API supporting custom LoRAs?)
-      const res = await fetch(jbilckeApi, {
+      const res = await fetch(nodeApi, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -53,8 +53,8 @@ export async function generateAnimation({
       }
 
       return content
-    } else if (videoEngine === "VIDEO_HOTSHOT_XL_API_FFFILONI") {
-      const res = await fetch(fffiloniApi + "api/predict", {
+    } else if (videoEngine === "VIDEO_HOTSHOT_XL_API_GRADIO") {
+      const res = await fetch(gradioApi + "api/predict", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -65,8 +65,8 @@ export async function generateAnimation({
           fn_index: 0,
           data: [
             prompt,
-            // lora, // not supported
-            // size, // not supported
+            lora,
+            size,
           ],
         }),
         cache: "no-store",
