@@ -18,8 +18,8 @@ export function Generate() {
 
   const { shouldWarn, colorClass, nbCharsUsed, nbCharsLimits } = useCharacterLimit({
     value: promptDraft,
-    nbCharsLimits: 50,
-    warnBelow: 15,
+    nbCharsLimits: 70,
+    warnBelow: 10,
   })
 
   const submitButtonBouncer = useSpring({
@@ -136,7 +136,7 @@ export function Generate() {
                 <div className={cn(
                   `flex flew-row ml-[-64px] items-center`,
                   `transition-all duration-300 ease-in-out`,
-                  `text-lg`,
+                  `text-base`,
                   `bg-sky-200`,
                   `rounded-full`,
                   `text-right`,
