@@ -43,7 +43,9 @@ export async function generateAnimation({
     "overexposed",
     "watermark",
     "watermarked",
-  ]
+  ].join(", ")
+
+  const [width, height] = size.split("x").map(x => Number(x))
 
   try {
 
@@ -60,7 +62,6 @@ export async function generateAnimation({
       }
       const replicate = new Replicate({ auth: replicateToken })
 
-      const [width, height] = size.split("x")
 
       // console.log("Calling replicate..")
       const seed = generateSeed()
