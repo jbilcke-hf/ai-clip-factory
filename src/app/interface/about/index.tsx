@@ -25,7 +25,7 @@ export function About() {
            This app is currently in development, and allows you to generate a GIF using text (and soon a LoRA)
          </p>
          <p>
-         👉 It uses an API that you can <a className="text-stone-600 underline" href="https://huggingface.co/spaces/jbilcke-hf/ai-comic-factory/blob/main/README.md" target="_blank">fork from here</a>. This API is based on the amazing work made by <a className="text-stone-600 underline" href="https://huggingface.co/fffiloni" target="_blank">@fffiloni</a> for his super cool <a className="text-stone-600 underline" href="https://huggingface.co/spaces/fffiloni/text-to-gif" target="_blank">Hotshot-XL Space</a>.
+         👉 It uses an API that you can <a className="text-stone-600 underline" href="https://github.com/jbilcke-hf/Hotshot-XL-Gradio-API" target="_blank">fork from here</a>. This API is based on the amazing work made by <a className="text-stone-600 underline" href="https://huggingface.co/fffiloni" target="_blank">@fffiloni</a> for his super cool <a className="text-stone-600 underline" href="https://huggingface.co/spaces/fffiloni/text-to-gif" target="_blank">Hotshot-XL Space</a>.
         </p>
          <p>
          👉 The model is <a className="text-stone-600 underline" href="https://huggingface.co/hotshotco/Hotshot-XL" target="_blank">Hotshot-XL</a> made by the awesome <a className="text-stone-600 underline" href="https://hotshot.co" target="_blank">hotshot.co team</a>.

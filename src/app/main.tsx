@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 import { paragraphFont } from "@/app/interface/fonts"
 import { Background } from "./interface/background"
 import { Generate } from "./interface/generate"
+import { BottomBar } from "./interface/bottom-bar"
 
 export function Main() {
 
@@ -15,6 +16,7 @@ export function Main() {
     )}>
       <Background />
       <Generate />
+      <BottomBar />
     </div>
   )
 }
