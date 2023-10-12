@@ -54,7 +54,7 @@ export async function generateAnimation({
 
       return content
     } else if (videoEngine === "VIDEO_HOTSHOT_XL_API_GRADIO") {
-      const res = await fetch(gradioApi + "api/predict", {
+      const res = await fetch(gradioApi + (gradioApi.endsWith("/") ? "" : "/") + "api/predict", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
