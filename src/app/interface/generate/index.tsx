@@ -120,7 +120,7 @@ export function Generate() {
                       ? `bg-sky-100 text-sky-500 border-transparent`
                       : `bg-sky-200 text-sky-600 selection:bg-sky-200`,
                     `text-left`,
-                    `text-2xl leading-10 px-6 h-16 pt-1`
+                    `text-xl leading-10 px-6 h-16 pt-1`
                   )}
                   value={promptDraft}
                   onChange={e => setPromptDraft(e.target.value)}
