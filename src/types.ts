@@ -1,11 +1,3 @@
-export type ImageInferenceSize =
-  | '320x768'
-  | '384x672'
-  | '416x608'
-  | '512x512'
-  | '608x416'
-  | '672x384'
-  | '768x320'
 
 export type ProjectionMode = 'cartesian' | 'spherical'
 
@@ -273,3 +265,38 @@ export type CurrentPanel =
   | "join"
   | "play"
   | "results"
+
+// vendor-specific types
+
+export type HotshotImageInferenceSize =
+| '320x768'
+| '384x672'
+| '416x608'
+| '512x512'
+| '608x416'
+| '672x384'
+| '768x320'
+| '1024x1024' // custom ratio - this isn't supported / supposed to work properly
+| '1024x512' // custom panoramic ratio - this isn't supported / supposed to work properly
+| '1024x576' // movie ratio (16:9) this isn't supported / supposed to work properly
+| '576x1024' // tiktok ratio (9:16) this isn't supported / supposed to work properly
+
+export type VideoOptions = {
+  positivePrompt: string
+
+  negativePrompt?: string
+
+  size?: HotshotImageInferenceSize
+  
+  /**
+   * Must be a model *name*
+   */
+  huggingFaceLora?: string
+
+  replicateLora?: string
+
+  nbFrames?: number // FPS (eg. 8)
+  duration?: number // in milliseconds
+
+  steps?: number
+}

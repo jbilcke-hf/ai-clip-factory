@@ -46,8 +46,31 @@ export function Generate() {
         console.log("starting transition, calling generateAnimation")
         const newAssetUrl = await generateAnimation({
           prompt: promptDraft,
-          lora: "https://huggingface.co/ostris/crayon_style_lora_sdxl/resolve/main/crayons_v1_sdxl.safetensors",
-          size: "512x512" // "320x768"
+          huggingFaceLora: "KappaNeuro/studio-ghibli-style",
+          // huggingFaceLora: "veryVANYA/ps1-graphics-sdxl-v2", // 
+          // huggingFaceLora: "ostris/crayon_style_lora_sdxl", // "https://huggingface.co/ostris/crayon_style_lora_sdxl/resolve/main/crayons_v1_sdxl.safetensors",
+          // replicateLora: "https://replicate.com/jbilcke/sdxl-panorama",
+
+          // ---- replicate models -----
+          // use: "in the style of TOK" in the prompt!
+          // or this? "in the style of <s0><s1>"
+          // I don't see a lot of diff
+          // 
+          // Zelda BOTW
+          // replicateLora: "https://pbxt.replicate.delivery/8UkalcGbGnrNHxGeqeCrhKcPbrRDlx4vLToRRlUWqzpnfieFB/trained_model.tar",
+
+          // Zelda64
+          // replicateLora: "https://pbxt.replicate.delivery/HPZlvCwDWtb5KpefUUcofwvZwTbrZAH9oLvzrn24hqUcQBfFB/trained_model.tar",
+          
+          // panorama lora
+          // replicateLora: "https://pbxt.replicate.delivery/nuXez5QNfEmhPk1TLGtl8Q0TwyucZbzTsfUe1ibUfNV0JrMMC/trained_model.tar",
+
+          // foundation
+          // replicateLora: "https://pbxt.replicate.delivery/VHU109Irgh6EPJrZ7aVScvadYDqXhlL3izfEAjfhs8Cvz0hRA/trained_model.tar",
+
+          size: "768x320", // "1024x512", // "512x512" // "320x768"
+
+          steps: 40,
       })
         setAssetUrl(newAssetUrl)
       } catch (err) {
@@ -120,7 +143,8 @@ export function Generate() {
                       ? `bg-sky-100 text-sky-500 border-transparent`
                       : `bg-sky-200 text-sky-600 selection:bg-sky-200`,
                     `text-left`,
-                    `text-xl leading-10 px-6 h-16 pt-1`
+                    `text-xl leading-10 px-6 h-16 pt-1`,
+                    `selection:bg-sky-800 selection:text-sky-200`
                   )}
                   value={promptDraft}
                   onChange={e => setPromptDraft(e.target.value)}
