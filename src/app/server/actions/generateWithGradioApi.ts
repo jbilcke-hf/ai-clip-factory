@@ -14,6 +14,17 @@ export async function generateVideoWithGradioAPI({
   duration = 1000,
   steps = 30,
 }: VideoOptions): Promise<string> {
+  console.log(`SEND TO ${gradioApi + (gradioApi.endsWith("/") ? "" : "/") + "api/predict"}:`, [
+    accessToken,
+    positivePrompt,
+    negativePrompt,
+    huggingFaceLora,
+    size,
+    generateSeed(),
+    steps,
+    nbFrames,
+    duration,
+  ])
   const res = await fetch(gradioApi + (gradioApi.endsWith("/") ? "" : "/") + "api/predict", {
     method: "POST",
     headers: {
@@ -21,7 +32,7 @@ export async function generateVideoWithGradioAPI({
       // Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      fn_index: 0,
+      fn_index: 1, // <- important!
       data: [
         accessToken,
         positivePrompt,
@@ -41,6 +52,7 @@ export async function generateVideoWithGradioAPI({
 
   const { data } = await res.json()
 
+  // console.log("data:", data)
   // Recommendation: handle errors
   if (res.status !== 200) {
     // This will activate the closest `error.js` Error Boundary
@@ -48,5 +60,5 @@ export async function generateVideoWithGradioAPI({
   }
   // console.log("data:", data.slice(0, 50))
 
-  return data
+  return data[0]
 }

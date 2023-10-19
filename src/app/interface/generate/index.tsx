@@ -45,8 +45,10 @@ export function Generate() {
       try {
         console.log("starting transition, calling generateAnimation")
         const newAssetUrl = await generateAnimation({
-          prompt: promptDraft,
+          positivePrompt: promptDraft,
+          negativePrompt: "",
           huggingFaceLora: "KappaNeuro/studio-ghibli-style",
+          triggerWord: "Studio Ghibli Style",
           // huggingFaceLora: "veryVANYA/ps1-graphics-sdxl-v2", // 
           // huggingFaceLora: "ostris/crayon_style_lora_sdxl", // "https://huggingface.co/ostris/crayon_style_lora_sdxl/resolve/main/crayons_v1_sdxl.safetensors",
           // replicateLora: "https://replicate.com/jbilcke/sdxl-panorama",
@@ -70,7 +72,9 @@ export function Generate() {
 
           size: "768x320", // "1024x512", // "512x512" // "320x768"
 
-          steps: 40,
+          nbFrames: 8, // if duration is 1000ms then it means 8 FPS
+          duration: 1000, // in ms
+          steps: 25,
       })
         setAssetUrl(newAssetUrl)
       } catch (err) {
@@ -90,7 +94,7 @@ export function Generate() {
       )}>
       <div className={cn(
         `flex flex-col md:flex-row`,
-        `w-full md:max-w-3xl lg:max-w-4xl xl:max-w-5xl max-h-[80vh]`,
+        `w-full md:max-w-4xl lg:max-w-5xl xl:max-w-6xl max-h-[80vh]`,
         `space-y-3 md:space-y-0 md:space-x-6`,
         `transition-all duration-300 ease-in-out`,
 
@@ -111,13 +115,20 @@ export function Generate() {
                 `space-y-3 md:space-y-6`,
                 `items-center`,
               )}>
+                {assetUrl.startsWith("data:video/mp4")
+                 ? <video
+                    muted
+                    autoPlay
+                    loop
+                    src={assetUrl}
+                  /> :
                 <img
                   src={assetUrl}
                   className={cn(
                     `w-[512px] object-cover`,
                     `rounded-2xl`
                     )}
-                />
+                />}
             </div> : null}
 
             <div className={cn(

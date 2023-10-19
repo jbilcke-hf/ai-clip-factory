@@ -14,7 +14,9 @@ export async function generateVideoWithReplicateAPI({
   size = "512x512",
   huggingFaceLora,
   replicateLora,
-  steps = 30
+  nbFrames = 8,
+  duration = 1000,
+  steps = 30,
 }: VideoOptions): Promise<string> {
   if (!replicateToken) {
     throw new Error(`you need to configure your AUTH_REPLICATE_API_TOKEN in order to use the REPLICATE rendering engine`)

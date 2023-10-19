@@ -16,6 +16,7 @@ export async function generateAnimation({
   size = "512x512",
   huggingFaceLora,
   replicateLora,
+  triggerWord,
   nbFrames = 8,
   duration = 1000,
   steps = 30,
@@ -26,6 +27,7 @@ export async function generateAnimation({
 
   // pimp the prompt
   positivePrompt = [
+    triggerWord,
     positivePrompt,
     "beautiful",
     "hd"

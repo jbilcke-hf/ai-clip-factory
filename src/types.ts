@@ -295,6 +295,8 @@ export type VideoOptions = {
 
   replicateLora?: string
 
+  triggerWord?: string
+  
   nbFrames?: number // FPS (eg. 8)
   duration?: number // in milliseconds
 
