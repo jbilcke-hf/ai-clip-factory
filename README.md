@@ -1,5 +1,5 @@
 ---
-title: Hotshot-XL Text-to-GIF
+title: Clip Factory
 emoji: 🤙
 colorFrom: blue
 colorTo: yellow
@@ -8,8 +8,17 @@ pinned: true
 app_port: 3000
 ---
 
-#  Hotshot-XL Text-to-GIF
+# The AI Clip Factory
 
+The AI Clip Factory is a space to create animated videos in an ultra simple and fun way. It is meant to be a child's play.
+
+## Text-to-video model
+
+The AI Clip Factory is a space about clip generation and providing a fun UI, and is not meant to promote a specific AI model.
+
+As a consequence, a model currently defined as default may be replaced at anytime by a newer SOTA model.
+
+Right now (2023-10-19) the default model is the base Hotshot-XL (use the official website for faster inference at [https://hotshot.co](https://hotshot.co)).
 
 ## Setup
 
