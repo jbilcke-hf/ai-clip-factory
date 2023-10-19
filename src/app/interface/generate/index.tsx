@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { headingFont } from "@/app/interface/fonts"
 import { useCharacterLimit } from "@/lib/useCharacterLimit"
 import { generateAnimation } from "@/app/server/actions/animation"
+import { postToCommunity } from "@/app/server/actions/community"
 
 export function Generate() {
   const [_isPending, startTransition] = useTransition()
@@ -42,13 +43,15 @@ export function Generate() {
     if (!promptDraft) { return }
     setLocked(true)
     startTransition(async () => {
+      const huggingFaceLora = "KappaNeuro/studio-ghibli-style"
+      const triggerWord = "Studio Ghibli Style"
       try {
         console.log("starting transition, calling generateAnimation")
         const newAssetUrl = await generateAnimation({
           positivePrompt: promptDraft,
           negativePrompt: "",
-          huggingFaceLora: "KappaNeuro/studio-ghibli-style",
-          triggerWord: "Studio Ghibli Style",
+          huggingFaceLora,
+          triggerWord,
           // huggingFaceLora: "veryVANYA/ps1-graphics-sdxl-v2", // 
           // huggingFaceLora: "ostris/crayon_style_lora_sdxl", // "https://huggingface.co/ostris/crayon_style_lora_sdxl/resolve/main/crayons_v1_sdxl.safetensors",
           // replicateLora: "https://replicate.com/jbilcke/sdxl-panorama",
@@ -77,6 +80,16 @@ export function Generate() {
           steps: 25,
       })
         setAssetUrl(newAssetUrl)
+
+        try {
+          await postToCommunity({
+            prompt: promptDraft,
+            model: huggingFaceLora,
+            assetUrl: newAssetUrl,
+          })
+        } catch (err) {
+          console.error(`not a blocked, but we failed to post to the community (reason: ${err})`)
+        }
       } catch (err) {
         console.error(err)
       } finally {
