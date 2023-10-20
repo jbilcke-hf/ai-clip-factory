@@ -4,6 +4,7 @@ import { VideoOptions } from "@/types"
 
 import { generateVideoWithGradioAPI } from "./generateWithGradioApi"
 import { generateVideoWithReplicateAPI } from "./generateWithReplicateAPI"
+import { filterOutBadWords } from "./censorship"
 
 const videoEngine = `${process.env.VIDEO_ENGINE || ""}`
 
@@ -24,6 +25,8 @@ export async function generateAnimation({
   if (!positivePrompt?.length) {
     throw new Error(`prompt is too short!`)
   }
+
+  positivePrompt = filterOutBadWords(positivePrompt)
 
   // pimp the prompt
   positivePrompt = [
