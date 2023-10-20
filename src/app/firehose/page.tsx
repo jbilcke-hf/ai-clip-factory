@@ -23,7 +23,7 @@ export default function FirehosePage() {
   useEffect(() => {
     startTransition(async () => {
       const newPosts = await getLatestPosts({
-        maxNbPosts: 40,
+        maxNbPosts: 200,
         shuffle: false,
       })
       setPosts(newPosts)
