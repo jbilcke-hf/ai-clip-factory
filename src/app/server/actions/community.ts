@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid"
 
 import { CreatePostResponse, GetAppPostResponse, GetAppPostsResponse, Post, PostVisibility } from "@/types"
 import { filterOutBadWords } from "./censorship"
+import { shuffleArray } from "../utils/shuffleArray"
 
 const apiUrl = `${process.env.COMMUNITY_API_URL || ""}`
 const apiToken = `${process.env.COMMUNITY_API_TOKEN || ""}`
@@ -96,10 +97,12 @@ export async function postToCommunity({
 
 export async function getLatestPosts({
   visibility,
-  maxNbPosts = 1000
+  maxNbPosts = 1000,
+  shuffle = true,
 }: {
   visibility?: PostVisibility
   maxNbPosts?: number
+  shuffle?: boolean
 }): Promise<Post[]> {
 
   let posts: Post[] = []
@@ -141,7 +144,13 @@ export async function getLatestPosts({
     // console.log("response:", response)
 
     const posts: Post[] = Array.isArray(response?.posts) ? response?.posts : []
-    posts.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+
+    if (shuffle) {
+      shuffleArray(posts)
+    } else {
+      posts.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+    }
+
     return posts.slice(0, maxNbPosts)
   } catch (err) {
     // const error = `failed to get posts: ${err}`
