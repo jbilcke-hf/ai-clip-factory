@@ -23,6 +23,16 @@ export async function getSDXLModels(): Promise<SDXLModel[]> {
 
   const hardcoded: SDXLModel[] = [
     {
+      "image": "https://i.imgur.com/CkzfZ8s_d.webp?maxwidth=760&fidelity=grand",
+      "title": "sdxl-modern-pixar",
+      "repo": "jbilcke-hf/sdxl-modern-pixar",
+      "trigger_word": "modern-pixar",
+      "weights": "pytorch_lora_weights.safetensors",
+      "is_compatible": true,
+      "likes": 0,
+      "downloads": 0
+    },
+    {
       "image": "https://pbxt.replicate.delivery/xnswkD3hpl5pMRCrzlwCq5wKA4HMkrJqfwAwd8xQhWndVG3IA/out-0.png",
       "title": "sdxl-cinematic-2",
       "repo": "jbilcke-hf/sdxl-cinematic-2",
@@ -32,18 +42,6 @@ export async function getSDXLModels(): Promise<SDXLModel[]> {
       "likes": 0,
       "downloads": 0
     },
-    /*
-    {
-      "image": "https://pbxt.replicate.delivery/xnswkD3hpl5pMRCrzlwCq5wKA4HMkrJqfwAwd8xQhWndVG3IA/out-0.png",
-      "title": "cinematic-2",
-      "repo": "jbilcke-hf/cinematic-2",
-      "trigger_word": "cinematic-2",
-      "weights": "pytorch_lora_weights.safetensors",
-      "is_compatible": true,
-      "likes": 0,
-      "downloads": 0
-    },
-    */
   ]
 
   return hardcoded.concat(compatibleModels)
