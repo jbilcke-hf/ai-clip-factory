@@ -226,7 +226,7 @@ export function Generate() {
   useEffect(() => {
     startTransition(async () => {
       const posts = await getLatestPosts({
-        maxNbPosts: 16,
+        maxNbPosts: 24,
         shuffle: true,
       })
       if (posts?.length) {
