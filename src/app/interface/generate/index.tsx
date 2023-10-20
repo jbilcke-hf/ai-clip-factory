@@ -137,7 +137,7 @@ export function Generate() {
       const models = await getSDXLModels()
       setModels(models)
 
-      const defaultModel = models.find(model => model.title.toLowerCase().includes("ghibli")) || models[0]
+      const defaultModel = models.find(model => model.repo.toLowerCase().includes("ghibli")) || models[0]
 
       if (defaultModel) {
         setSelectedModel(defaultModel)
@@ -157,7 +157,14 @@ export function Generate() {
       }
 
       if (existingModelName) {
-        let existingModel = models.find(model => model.title.toLowerCase().trim().includes(existingModelName))
+
+        let existingModel = models.find(model => {
+          return (
+            model.repo.toLowerCase().trim().includes(existingModelName)
+            || model.title.toLowerCase().trim().includes(existingModelName)
+           )
+        })
+
         if (existingModel) {
           setSelectedModel(existingModel)
         }
@@ -176,8 +183,16 @@ export function Generate() {
           }
 
           if (post.model) {
-            const existingModel = models.find(model => model.title.toLowerCase().trim().includes(post.model.toLowerCase().trim()))
-        
+
+            const nameToFind = post.model.toLowerCase().trim()
+            const existingModel = models.find(model => {
+      
+              return (
+                model.repo.toLowerCase().trim().includes(nameToFind)
+                || model.title.toLowerCase().trim().includes(nameToFind)
+              )
+            })
+
             if (existingModel) {
               setSelectedModel(existingModel)
             }
@@ -225,8 +240,15 @@ export function Generate() {
     }
 
     if (post.model) {
-      const existingModel = models.find(model => model.title.toLowerCase().trim().includes(post.model.toLowerCase().trim()))
-  
+      const nameToFind = post.model.toLowerCase().trim()
+      const existingModel = models.find(model => {
+
+        return (
+          model.repo.toLowerCase().trim().includes(nameToFind)
+          || model.title.toLowerCase().trim().includes(nameToFind)
+        )
+      })
+
       if (existingModel) {
         setSelectedModel(existingModel)
       }
