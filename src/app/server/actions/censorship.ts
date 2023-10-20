@@ -158,15 +158,15 @@ export const filterOutBadWords = (sentence: string) => {
     let result: string = word
     // some users want to play it smart and bypass our system so let's play too
     if (chickens.includes(fingerprint)) {
-      result = "large chicken"
+      result = "chicken"
     } else if (ducks.includes(fingerprint)) {
-      result = "big duck"
+      result = "duck"
     } else if (cats.includes(fingerprint)) {
       result = "cat"
     } else if (roasted.includes(fingerprint)) {
-      result = "roasted chicken"
+      result = "penguin"
     } else if (young.includes(fingerprint)) {
-      result = "adult"
+      result = "woman"
     } else if (banned.includes(fingerprint)) {
       result = "_BANNED_"
     }
