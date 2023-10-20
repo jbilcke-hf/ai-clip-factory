@@ -192,7 +192,8 @@ export function Generate() {
   useEffect(() => {
     startTransition(async () => {
       const posts = await getLatestPosts({
-        maxNbPosts: 16
+        maxNbPosts: 16,
+        shuffle: true,
       })
       if (posts?.length) {
         setCommunityRoll(posts)
