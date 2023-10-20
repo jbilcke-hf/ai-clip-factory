@@ -409,12 +409,17 @@ export function Generate() {
             `space-y-2 md:space-y-3 lg:space-y-4 xl:space-y-6`,
             `px-3 py-6 md:px-6 md:py-12 xl:px-8 xl:py-16`,
           )}>
-             <div className="flex flex-row">
+             <div className="flex flex-col text-center">
                 <h3 className={cn(
                   headingFont.className,
-                  "text-4xl text-sky-600 mb-4"
-                  )}>{models.length ? "Pick a style:" : "Loading styles.."}</h3>
+                  "text-3xl text-sky-600 mb-4"
+                  )}>{models.length ? `You selected:` : ""}</h3>
+                <h3 className={cn(
+                  headingFont.className,
+                  "text-5xl text-sky-700 mb-4"
+                  )}>{models.length ? `${(selectedModel?.title || "").replaceAll("-", " ")}` : "Loading styles.."}</h3>
               </div>
+              
               <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2">
                 {models.map(model =>
               <div key={model.repo}>
