@@ -369,7 +369,7 @@ export function Generate() {
                   disabled={isLocked}
                   onClick={handleSubmit}
                   >
-                  {isLocked ? `Please wait..` : "Generate"}
+                  {isLocked ? `Loading..` : "Generate"}
                 </animated.button>
               </div>
             </div>
@@ -444,7 +444,7 @@ export function Generate() {
                 <h3 className={cn(
                   headingFont.className,
                   "text-4xl text-sky-600 mb-4"
-                  )}>{communityRoll.length ? "Community Roll:" : "Loading community toll.."}</h3>
+                  )}>{communityRoll.length ? "Community creations:" : "Loading community roll.."}</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
                 {communityRoll.map(post =>

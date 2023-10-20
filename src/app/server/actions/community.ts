@@ -85,7 +85,7 @@ export async function postToCommunity({
     }
     
     const response = (await res.json()) as CreatePostResponse
-    console.log("response:", response)
+    // console.log("response:", response)
     return response.post
   } catch (err) {
     const error = `failed to post to community: ${err}`
