@@ -28,6 +28,16 @@ export async function postToCommunity({
     console.log(`user attempted to use bad words! their original prompt is: ${before}`)
   }
 
+  if (prompt.includes("mastiff") 
+  || prompt.includes("anthro dog")
+  || prompt.includes("open-legged")
+  || prompt.includes("peeing")
+  || prompt.includes("muscular")
+  || prompt.includes("exposed")) {
+    // nope, there will be no "large muscular mastiff becoming bigger" on the community roll.
+    throw new Error(`error`)
+  }
+
   // if the community API is disabled,
   // we don't fail, we just mock
   if (!apiUrl) {
