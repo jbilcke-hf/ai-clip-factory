@@ -8,11 +8,13 @@ import { cn } from "@/lib/utils"
 import { headingFont } from "@/app/interface/fonts"
 import { useCharacterLimit } from "@/lib/useCharacterLimit"
 import { generateAnimation } from "@/app/server/actions/animation"
-import { postToCommunity } from "@/app/server/actions/community"
+import { getLatestPosts, getPost, postToCommunity } from "@/app/server/actions/community"
 import { useCountdown } from "@/lib/useCountdown"
 import { Countdown } from "../countdown"
 import { getSDXLModels } from "@/app/server/actions/models"
-import { SDXLModel } from "@/types"
+import { Post, SDXLModel } from "@/types"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { TooltipProvider } from "@radix-ui/react-tooltip"
 
 export function Generate() {
   const router = useRouter()
@@ -35,11 +37,13 @@ export function Generate() {
   const [showModels, setShowModels] = useState(true)
   // useEffect(() => { runsRef.current = runs },  [runs])
 
+  const [communityRoll, setCommunityRoll] = useState<Post[]>([])
+
   console.log("runs:", runs)
   const { progressPercent, remainingTimeInSec } = useCountdown({
     isActive: isLocked,
     timerId: runs, // everytime we change this, the timer will reset
-    durationInSec: 45,
+    durationInSec: 50, // it usually takes 40 seconds, but there might be lag
     onEnd: () => {}
   })
   
@@ -78,7 +82,7 @@ export function Generate() {
     })
 
     startTransition(async () => {
-      const huggingFaceLora = selectedModel ? selectedModel.repo : "KappaNeuro/studio-ghibli-style"
+      const huggingFaceLora = selectedModel ? selectedModel.repo.trim() : "KappaNeuro/studio-ghibli-style"
       const triggerWord =  selectedModel ? selectedModel.trigger_word : "Studio Ghibli Style"
 
       // now you got a read/write object
@@ -112,9 +116,9 @@ export function Generate() {
 
           // now you got a read/write object
           const current = new URLSearchParams(Array.from(searchParams.entries()))
-          current.set("postId", post.postId)
-          current.set("prompt", post.prompt)
-          current.set("model", post.model)
+          current.set("postId", post.postId.trim())
+          current.set("prompt", post.prompt.trim())
+          current.set("model", post.model.trim())
           const search = current.toString()
           router.push(`${pathname}${search ? `?${search}` : ""}`)
         } catch (err) {
@@ -133,46 +137,135 @@ export function Generate() {
       const models = await getSDXLModels()
       setModels(models)
 
-      let defaultModel = models.find(model => model.title.toLowerCase().includes("ghibli")) || models[0]
+      const defaultModel = models.find(model => model.title.toLowerCase().includes("ghibli")) || models[0]
+
       if (defaultModel) {
         setSelectedModel(defaultModel)
+      }
+
+      // now we load URL params
+      const current = new URLSearchParams(Array.from(searchParams.entries()))
+
+      // URL query params
+      const existingPostId = current.get("postId") || ""
+      const existingPrompt = current.get("prompt")?.trim() || ""
+      const existingModelName = current.get("model")?.toLowerCase().trim() || ""
+
+      // if and only if we don't have a post id, then we look at the other query params
+      if (existingPrompt) {
+        setPromptDraft(existingPrompt)
+      }
+
+      if (existingModelName) {
+        let existingModel = models.find(model => model.title.toLowerCase().trim().includes(existingModelName))
+        if (existingModel) {
+          setSelectedModel(existingModel)
+        }
+      }
+
+      // if we have a post id, then we use that to override all the previous values
+      if (existingPostId) {
+        try {
+          const post = await getPost(existingPostId)
+
+          if (post.assetUrl) {
+            setAssetUrl(post.assetUrl)
+          }
+          if (post.prompt) {
+            setPromptDraft(post.prompt)
+          }
+
+          if (post.model) {
+            const existingModel = models.find(model => model.title.toLowerCase().trim().includes(post.model.toLowerCase().trim()))
+        
+            if (existingModel) {
+              setSelectedModel(existingModel)
+            }
+          }
+        } catch (err) {
+          console.error(`failed to load the community post (${err})`)
+        }
       }
     })
   }, [])
 
+  useEffect(() => {
+    startTransition(async () => {
+      const posts = await getLatestPosts({
+        maxNbPosts: 16
+      })
+      if (posts?.length) {
+        setCommunityRoll(posts)
+      }
+    })
+  }, [])
+
+  const handleSelectCommunityPost = (post: Post) => {
+    if (isLocked) { return }
+
+    scrollRef.current?.scroll({
+      top: 0,
+      behavior: 'smooth'
+    })
+
+    // now you got a read/write object
+    const current = new URLSearchParams(Array.from(searchParams.entries()))
+    current.set("postId", post.postId.trim())
+    current.set("prompt", post.prompt.trim())
+    current.set("model", post.model.trim())
+    const search = current.toString()
+    router.push(`${pathname}${search ? `?${search}` : ""}`)
+
+    if (post.assetUrl) {
+      setAssetUrl(post.assetUrl)
+    }
+    if (post.prompt) {
+      setPromptDraft(post.prompt)
+    }
+
+    if (post.model) {
+      const existingModel = models.find(model => model.title.toLowerCase().trim().includes(post.model.toLowerCase().trim()))
+  
+      if (existingModel) {
+        setSelectedModel(existingModel)
+      }
+    }
+  }
+
   return (
-    <div className={cn(
+    <div
+      ref={scrollRef}
+      className={cn(
       `fixed inset-0 w-screen h-screen`,
       `flex flex-col items-center justify-center`,
-      `transition-all duration-300 ease-in-out`,
-      //  panel === "play" ? "opacity-1 translate-x-0" : "opacity-0 translate-x-[-1000px] pointer-events-none"
-      )}>
+      // `transition-all duration-300 ease-in-out`,
+      `overflow-y-scroll`,
+       )}>
+      <TooltipProvider>
       {isLocked ? <Countdown
         progressPercent={progressPercent}
         remainingTimeInSec={remainingTimeInSec}
       /> : null}
-      <div className={cn(
-        `flex flex-col md:flex-row`,
-        `w-full md:max-w-4xl lg:max-w-5xl xl:max-w-6xl max-h-[80vh]`,
-        `space-y-3 md:space-y-0 md:space-x-6`,
-        `transition-all duration-300 ease-in-out`,
-      )}>
-        <div
-        ref={scrollRef}
-        className={cn(
-          `flex flex-col`,
-          `flex-grow rounded-2xl md:rounded-3xl`,
-          `backdrop-blur-lg bg-white/40`,
-          `border-2 border-white/10`,
-          `items-center`,
-          `space-y-6 md:space-y-8 lg:space-y-12 xl:space-y-16`,
-          `px-3 py-6 md:px-6 md:py-12 xl:px-8 xl:py-16`,
-          `overflow-y-scroll`,
-        )}
-        style={{
-          boxShadow: "inset 0 2px 4px 0 rgb(0 0 0 / 0.05)" // TODO: convert to tailwind
-        }}>
+      <div
 
+      className={cn(
+        `flex flex-col`,
+        `w-full md:max-w-4xl lg:max-w-5xl xl:max-w-6xl max-h-[80vh]`,
+        `space-y-8`,
+       //  `transition-all duration-300 ease-in-out`,
+      )}>
+      
+          <div
+          className={cn(
+            `flex flex-col`,
+            `flex-grow rounded-2xl md:rounded-3xl`,
+            `backdrop-blur-lg bg-white/40`,
+            `border-2 border-white/10`,
+            `items-center`,
+            `space-y-6 md:space-y-8 lg:space-y-12 xl:space-y-16`,
+            `px-3 py-6 md:px-6 md:py-12 xl:px-8 xl:py-16`,
+
+          )}>
             {assetUrl ? <div
               className={cn(
                 `flex flex-col`,
@@ -185,6 +278,7 @@ export function Generate() {
                     autoPlay
                     loop
                     src={assetUrl}
+                    className="rounded-md overflow-hidden"
                   /> :
                 <img
                   src={assetUrl}
@@ -198,11 +292,11 @@ export function Generate() {
             <div className={cn(
               `flex flex-col md:flex-row`,
               `space-y-3 md:space-y-0 md:space-x-3`,
-              ` w-full max-w-[1024px]`,
+              ` w-full md:max-w-[1024px]`,
               `items-center justify-between`
             )}>
               <div className={cn(
-                `flex flex-row flex-grow`
+                `flex flex-row flex-grow w-full`
               )}>
                 <input
                   type="text"
@@ -280,21 +374,35 @@ export function Generate() {
               </div>
             </div>
 
-            <div className="flex flex-col">
+          </div>
+
+          <div
+            className={cn(
+            `flex flex-col`,
+            `flex-grow rounded-2xl md:rounded-3xl`,
+            `backdrop-blur-lg bg-white/40`,
+            `border-2 border-white/10`,
+            `items-center`,
+            `space-y-2 md:space-y-3 lg:space-y-4 xl:space-y-6`,
+            `px-3 py-6 md:px-6 md:py-12 xl:px-8 xl:py-16`,
+          )}>
              <div className="flex flex-row">
                 <h3 className={cn(
                   headingFont.className,
-                  "text-2xl text-sky-600 mb-4"
+                  "text-4xl text-sky-600 mb-4"
                   )}>{models.length ? "Pick a style:" : "Loading styles.."}</h3>
               </div>
-              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-10 lg:grid-cols-11  xl:grid-cols-12 gap-2">
+              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2">
                 {models.map(model =>
-                  <div key={model.repo}
-                  className={isLocked ? '' : `cursor-pointer`}
-                  onClick={() => {
-                    if (!isLocked) { setSelectedModel(model) }
-                  }}>
-                  <img
+              <div key={model.repo}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={isLocked ? 'cursor-not-allowed' : `cursor-pointer`}
+                      onClick={() => {
+                        if (!isLocked) { setSelectedModel(model) }
+                      }}>
+                     <img
                     src={
                       model.image.startsWith("http")
                       ? model.image
@@ -304,29 +412,75 @@ export function Generate() {
                       `transition-all duration-150 ease-in-out`,
                       `w-20 h-20 object-cover rounded-lg overflow-hidden`,
                       `border-4 border-transparent`,
-                      `hover:border-yellow-50 hover:scale-110`,
+                      isLocked ? '' : `hover:border-yellow-50 hover:scale-110`,
                       selectedModel?.repo === model.repo
                         ? `scale-110 border-4 border-yellow-300 hover:border-yellow-300`
                         : ``
                       )}
                   ></img>
-                </div>)}
+                </div>
+                </TooltipTrigger>
+                {!isLocked && <TooltipContent>
+                  <p className="w-full max-w-xl">{model.title}</p>
+                </TooltipContent>}
+              </Tooltip>
+              </div>
+                 )}
               </div>
             </div>
 
-            {/*<div>
-              <p>Community creations</p>
-              <div>
-              <div>A</div>
-              <div>B</div>
-              <div>C</div>
-              <div>D</div>
-              <div>E</div>
+
+        <div
+            className={cn(
+            `flex flex-col`,
+            `flex-grow rounded-2xl md:rounded-3xl`,
+            `backdrop-blur-lg bg-white/40`,
+            `border-2 border-white/10`,
+            `items-center`,
+            `space-y-2 md:space-y-3 lg:space-y-4 xl:space-y-6`,
+            `px-3 py-6 md:px-6 md:py-12 xl:px-8 xl:py-16`,
+          )}>
+             <div className="flex flex-row">
+                <h3 className={cn(
+                  headingFont.className,
+                  "text-4xl text-sky-600 mb-4"
+                  )}>{communityRoll.length ? "Community Roll:" : "Loading community toll.."}</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+                {communityRoll.map(post =>
+              <div key={post.postId}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={isLocked ? 'cursor-not-allowed' : `cursor-pointer`}
+                      onClick={() => { handleSelectCommunityPost(post) }}>
+                  <video
+                    muted
+                    autoPlay
+                    loop
+                    src={post.assetUrl}
+                    className={cn(
+                      `rounded-md overflow-hidden`,
+                      `transition-all duration-150 ease-in-out`,
+                      `w-40 h-30 object-cover rounded-lg overflow-hidden`,
+                      `border-4 border-transparent`,
+                      isLocked ? '' : `hover:border-yellow-50 hover:scale-110`,
+                    )}
+                  />
+                </div>
+                </TooltipTrigger>
+                {!isLocked && <TooltipContent>
+                  <p className="w-full max-w-xl">{post.prompt}</p>
+                </TooltipContent>}
+              </Tooltip>
+              </div>
+                 )}
+              </div>
             </div>
+  
           </div>
-                      */}
-        </div>
-      </div>
+     
+      </TooltipProvider>
     </div>
   )
 }
