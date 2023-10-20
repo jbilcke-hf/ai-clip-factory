@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from "react"
 
 export function useCountdown({
+  isActive,
   timerId,
   durationInSec,
   onEnd = () => {},
 }: {
+  isActive: boolean
   timerId: string | number
   durationInSec: number
   onEnd: () => void
@@ -21,17 +23,25 @@ export function useCountdown({
     clearInterval(intervalRef.current)
     setElapsedTimeInMs(0)
     startedAt.current = new Date()
-    intervalRef.current = setInterval(() => {
-      const now = new Date()
-      const newElapsedInMs = Math.min(durationInMs, now.getTime() - startedAt.current!.getTime())
-      setElapsedTimeInMs(newElapsedInMs)
-      if (elapsedTimeInMs >= durationInMs) {
-        console.log("end of timer")
-        clearInterval(intervalRef.current)
-        onEnd()
-      }
-    }, 100)
-  }, [timerId, durationInMs])
+
+    if (isActive) {
+      intervalRef.current = setInterval(() => {
+        const now = new Date()
+        const newElapsedInMs = Math.min(durationInMs, now.getTime() - startedAt.current!.getTime())
+        setElapsedTimeInMs(newElapsedInMs)
+        if (elapsedTimeInMs > durationInMs) {
+          console.log("end of timer")
+          clearInterval(intervalRef.current)
+          onEnd()
+        }
+      }, 100)
+    }
+
+    return () => {
+      console.log("destruction of timer")
+      clearInterval(intervalRef.current)
+    }
+  }, [isActive, timerId, durationInMs])
 
   const remainingTimeInMs = Math.max(0, durationInMs - elapsedTimeInMs)
 

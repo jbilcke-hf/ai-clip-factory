@@ -59,9 +59,11 @@ export async function postToCommunity({
 
     const postId = uuidv4()
 
-    const post: Partial<Post> = { postId, appId, prompt, assetUrl }
+    const post: Partial<Post> = { postId, appId, prompt, model, assetUrl }
 
-    console.table(post)
+    console.log(`target url is: ${
+      `${apiUrl}/posts/${appId}`
+    }`)
 
     const res = await fetch(`${apiUrl}/posts/${appId}`, {
       method: "POST",
@@ -76,18 +78,14 @@ export async function postToCommunity({
     // next: { revalidate: 1 }
     })
 
-    // console.log("res:", res)
-    // The return value is *not* serialized
-    // You can return Date, Map, Set, etc.
-    
     // Recommendation: handle errors
-    if (res.status !== 200) {
+    if (res.status !== 201) {
       // This will activate the closest `error.js` Error Boundary
       throw new Error('Failed to fetch data')
     }
     
     const response = (await res.json()) as CreatePostResponse
-    // console.log("response:", response)
+    console.log("response:", response)
     return response.post
   } catch (err) {
     const error = `failed to post to community: ${err}`

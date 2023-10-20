@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
 import { useSpring, animated } from "@react-spring/web"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
@@ -11,6 +11,8 @@ import { generateAnimation } from "@/app/server/actions/animation"
 import { postToCommunity } from "@/app/server/actions/community"
 import { useCountdown } from "@/lib/useCountdown"
 import { Countdown } from "../countdown"
+import { getSDXLModels } from "@/app/server/actions/models"
+import { SDXLModel } from "@/types"
 
 export function Generate() {
   const router = useRouter()
@@ -18,15 +20,26 @@ export function Generate() {
   const searchParams = useSearchParams()
   const [_isPending, startTransition] = useTransition()
 
+  const scrollRef = useRef<HTMLDivElement>(null)
+
   const [isLocked, setLocked] = useState(false)
   const [promptDraft, setPromptDraft] = useState("")
   const [assetUrl, setAssetUrl] = useState("")
   const [isOverSubmitButton, setOverSubmitButton] = useState(false)
 
+  const [models, setModels] = useState<SDXLModel[]>([])
+  const [selectedModel, setSelectedModel] = useState<SDXLModel>()
+
   const [runs, setRuns] = useState(0)
+  const runsRef = useRef(0)
+  const [showModels, setShowModels] = useState(true)
+  // useEffect(() => { runsRef.current = runs },  [runs])
+
+  console.log("runs:", runs)
   const { progressPercent, remainingTimeInSec } = useCountdown({
+    isActive: isLocked,
     timerId: runs, // everytime we change this, the timer will reset
-    durationInSec: 40,
+    durationInSec: 45,
     onEnd: () => {}
   })
   
@@ -54,11 +67,27 @@ export function Generate() {
     console.log("handleSubmit:", { isLocked, promptDraft })
     if (isLocked) { return }
     if (!promptDraft) { return }
+
+    setShowModels(false)
     setRuns(runs + 1)
     setLocked(true)
+
+    scrollRef.current?.scroll({
+      top: 0,
+      behavior: 'smooth'
+    })
+
     startTransition(async () => {
-      const huggingFaceLora = "KappaNeuro/studio-ghibli-style"
-      const triggerWord = "Studio Ghibli Style"
+      const huggingFaceLora = selectedModel ? selectedModel.repo : "KappaNeuro/studio-ghibli-style"
+      const triggerWord =  selectedModel ? selectedModel.trigger_word : "Studio Ghibli Style"
+
+      // now you got a read/write object
+      const current = new URLSearchParams(Array.from(searchParams.entries()))
+      current.set("prompt", promptDraft)
+      current.set("model", huggingFaceLora)
+      const search = current.toString()
+      router.push(`${pathname}${search ? `?${search}` : ""}`)
+
       try {
         console.log("starting transition, calling generateAnimation")
         const newAssetUrl = await generateAnimation({
@@ -66,33 +95,11 @@ export function Generate() {
           negativePrompt: "",
           huggingFaceLora,
           triggerWord,
-          // huggingFaceLora: "veryVANYA/ps1-graphics-sdxl-v2", // 
-          // huggingFaceLora: "ostris/crayon_style_lora_sdxl", // "https://huggingface.co/ostris/crayon_style_lora_sdxl/resolve/main/crayons_v1_sdxl.safetensors",
-          // replicateLora: "https://replicate.com/jbilcke/sdxl-panorama",
-
-          // ---- replicate models -----
-          // use: "in the style of TOK" in the prompt!
-          // or this? "in the style of <s0><s1>"
-          // I don't see a lot of diff
-          // 
-          // Zelda BOTW
-          // replicateLora: "https://pbxt.replicate.delivery/8UkalcGbGnrNHxGeqeCrhKcPbrRDlx4vLToRRlUWqzpnfieFB/trained_model.tar",
-
-          // Zelda64
-          // replicateLora: "https://pbxt.replicate.delivery/HPZlvCwDWtb5KpefUUcofwvZwTbrZAH9oLvzrn24hqUcQBfFB/trained_model.tar",
-          
-          // panorama lora
-          // replicateLora: "https://pbxt.replicate.delivery/nuXez5QNfEmhPk1TLGtl8Q0TwyucZbzTsfUe1ibUfNV0JrMMC/trained_model.tar",
-
-          // foundation
-          // replicateLora: "https://pbxt.replicate.delivery/VHU109Irgh6EPJrZ7aVScvadYDqXhlL3izfEAjfhs8Cvz0hRA/trained_model.tar",
-
-          size: "672x384", // "1024x512", // "512x512" // "320x768"
-
+          size: "608x416", // "1024x512", // "512x512" // "320x768"
           nbFrames: 8, // if duration is 1000ms then it means 8 FPS
           duration: 1000, // in ms
           steps: 25,
-      })
+        })
         setAssetUrl(newAssetUrl)
 
         try {
@@ -111,7 +118,7 @@ export function Generate() {
           const search = current.toString()
           router.push(`${pathname}${search ? `?${search}` : ""}`)
         } catch (err) {
-          console.error(`not a blocked, but we failed to post to the community (reason: ${err})`)
+          console.error(`not a blocker, but we failed to post to the community (reason: ${err})`)
         }
       } catch (err) {
         console.error(err)
@@ -120,6 +127,18 @@ export function Generate() {
       }
     })
   }
+
+  useEffect(() => {
+    startTransition(async () => {
+      const models = await getSDXLModels()
+      setModels(models)
+
+      let defaultModel = models.find(model => model.title.toLowerCase().includes("ghibli")) || models[0]
+      if (defaultModel) {
+        setSelectedModel(defaultModel)
+      }
+    })
+  }, [])
 
   return (
     <div className={cn(
@@ -137,17 +156,22 @@ export function Generate() {
         `w-full md:max-w-4xl lg:max-w-5xl xl:max-w-6xl max-h-[80vh]`,
         `space-y-3 md:space-y-0 md:space-x-6`,
         `transition-all duration-300 ease-in-out`,
-
       )}>
-        <div className={cn(
+        <div
+        ref={scrollRef}
+        className={cn(
           `flex flex-col`,
           `flex-grow rounded-2xl md:rounded-3xl`,
           `backdrop-blur-lg bg-white/40`,
           `border-2 border-white/10`,
           `items-center`,
           `space-y-6 md:space-y-8 lg:space-y-12 xl:space-y-16`,
-          `px-3 py-6 md:px-6 md:py-12 xl:px-8 xl:py-16`
-        )}>
+          `px-3 py-6 md:px-6 md:py-12 xl:px-8 xl:py-16`,
+          `overflow-y-scroll`,
+        )}
+        style={{
+          boxShadow: "inset 0 2px 4px 0 rgb(0 0 0 / 0.05)" // TODO: convert to tailwind
+        }}>
 
             {assetUrl ? <div
               className={cn(
@@ -226,40 +250,71 @@ export function Generate() {
                 </div>
               </div>
               <div className="flex flex-row w-52">
-              <animated.button
-                style={{
-                  textShadow: "0px 0px 1px #000000ab",
-                  ...submitButtonBouncer
-                }}
-                onMouseEnter={() => setOverSubmitButton(true)}
-                onMouseLeave={() => setOverSubmitButton(false)}
-                className={cn(
-                  `px-6 py-3`,
-                  `rounded-full`,
-                  `transition-all duration-300 ease-in-out`,
-                  isLocked
-                    ? `bg-orange-500/20  border-orange-800/10`
-                    : `bg-sky-500/80 hover:bg-sky-400/100  border-sky-800/20`,
-                  `text-center`,
-                  `w-full`,
-                  `text-2xl text-sky-50`,
-                  `border`,
-                  headingFont.className,
-                  // `transition-all duration-300`,
-                  // `hover:animate-bounce`
-                )}
-                disabled={isLocked}
-                onClick={handleSubmit}
-                >
-                {isLocked ? "Generating.." : "Generate"}
-              </animated.button>
-              </div>
-              <div>
-                Pick a model..
+                <animated.button
+                  style={{
+                    textShadow: "0px 0px 1px #000000ab",
+                    ...submitButtonBouncer
+                  }}
+                  onMouseEnter={() => setOverSubmitButton(true)}
+                  onMouseLeave={() => setOverSubmitButton(false)}
+                  className={cn(
+                    `px-6 py-3`,
+                    `rounded-full`,
+                    `transition-all duration-300 ease-in-out`,
+                    isLocked
+                      ? `bg-orange-500/20  border-orange-800/10`
+                      : `bg-sky-500/80 hover:bg-sky-400/100  border-sky-800/20`,
+                    `text-center`,
+                    `w-full`,
+                    `text-2xl text-sky-50`,
+                    `border`,
+                    headingFont.className,
+                    // `transition-all duration-300`,
+                    // `hover:animate-bounce`
+                  )}
+                  disabled={isLocked}
+                  onClick={handleSubmit}
+                  >
+                  {isLocked ? `Please wait..` : "Generate"}
+                </animated.button>
               </div>
             </div>
 
-            <div>
+            <div className="flex flex-col">
+             <div className="flex flex-row">
+                <h3 className={cn(
+                  headingFont.className,
+                  "text-2xl text-sky-600 mb-4"
+                  )}>{models.length ? "Pick a style:" : "Loading styles.."}</h3>
+              </div>
+              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-10 lg:grid-cols-11  xl:grid-cols-12 gap-2">
+                {models.map(model =>
+                  <div key={model.repo}
+                  className={isLocked ? '' : `cursor-pointer`}
+                  onClick={() => {
+                    if (!isLocked) { setSelectedModel(model) }
+                  }}>
+                  <img
+                    src={
+                      model.image.startsWith("http")
+                      ? model.image
+                      : `https://multimodalart-loratheexplorer.hf.space/file=${model.image}`
+                    }
+                    className={cn(
+                      `transition-all duration-150 ease-in-out`,
+                      `w-20 h-20 object-cover rounded-lg overflow-hidden`,
+                      `border-4 border-transparent`,
+                      `hover:border-yellow-50 hover:scale-110`,
+                      selectedModel?.repo === model.repo
+                        ? `scale-110 border-4 border-yellow-300 hover:border-yellow-300`
+                        : ``
+                      )}
+                  ></img>
+                </div>)}
+              </div>
+            </div>
+
+            {/*<div>
               <p>Community creations</p>
               <div>
               <div>A</div>
@@ -268,7 +323,8 @@ export function Generate() {
               <div>D</div>
               <div>E</div>
             </div>
-            </div>
+          </div>
+                      */}
         </div>
       </div>
     </div>

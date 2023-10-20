@@ -303,3 +303,14 @@ export type VideoOptions = {
 
   steps?: number
 }
+
+export type SDXLModel = {
+  image: string
+  title: string
+  repo: string
+  trigger_word: string
+  weights: string
+  is_compatible: boolean
+  likes: number
+  downloads: number
+}
