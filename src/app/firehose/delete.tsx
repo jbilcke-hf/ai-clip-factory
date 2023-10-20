@@ -38,7 +38,10 @@ export function Delete({ post, moderationKey = "", onDelete = () => {} }: { post
         {post ?<div className="flex flex-col py-4 text-stone-800">
        
         <div className="w-full h-64">
-          <img
+          <video
+            loop
+            autoPlay
+            muted
               src={post.assetUrl}
               className={cn(
                 `w-full h-64 rounded-xl overflow-hidden object-cover`,
