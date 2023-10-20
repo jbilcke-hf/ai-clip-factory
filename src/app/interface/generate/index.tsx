@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useSpring, animated } from "@react-spring/web"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 import { cn } from "@/lib/utils"
 import { headingFont } from "@/app/interface/fonts"
@@ -12,6 +13,9 @@ import { useCountdown } from "@/lib/useCountdown"
 import { Countdown } from "../countdown"
 
 export function Generate() {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [_isPending, startTransition] = useTransition()
 
   const [isLocked, setLocked] = useState(false)
@@ -92,11 +96,20 @@ export function Generate() {
         setAssetUrl(newAssetUrl)
 
         try {
-          await postToCommunity({
+          const post = await postToCommunity({
             prompt: promptDraft,
             model: huggingFaceLora,
             assetUrl: newAssetUrl,
           })
+          console.log("successfully submitted to the community!", post)
+
+          // now you got a read/write object
+          const current = new URLSearchParams(Array.from(searchParams.entries()))
+          current.set("postId", post.postId)
+          current.set("prompt", post.prompt)
+          current.set("model", post.model)
+          const search = current.toString()
+          router.push(`${pathname}${search ? `?${search}` : ""}`)
         } catch (err) {
           console.error(`not a blocked, but we failed to post to the community (reason: ${err})`)
         }
@@ -241,17 +254,21 @@ export function Generate() {
                 {isLocked ? "Generating.." : "Generate"}
               </animated.button>
               </div>
+              <div>
+                Pick a model..
+              </div>
             </div>
-            {/*
-            Put community creations here, this may get wild though.
+
             <div>
+              <p>Community creations</p>
+              <div>
               <div>A</div>
               <div>B</div>
               <div>C</div>
               <div>D</div>
               <div>E</div>
             </div>
-                */}
+            </div>
         </div>
       </div>
     </div>
