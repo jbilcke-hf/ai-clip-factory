@@ -30,7 +30,7 @@ export function useCountdown({
         const newElapsedInMs = Math.min(durationInMs, now.getTime() - startedAt.current!.getTime())
         setElapsedTimeInMs(newElapsedInMs)
         if (elapsedTimeInMs > durationInMs) {
-          console.log("end of timer")
+          // console.log("end of timer")
           clearInterval(intervalRef.current)
           onEnd()
         }
@@ -38,7 +38,7 @@ export function useCountdown({
     }
 
     return () => {
-      console.log("destruction of timer")
+      // console.log("destruction of timer")
       clearInterval(intervalRef.current)
     }
   }, [isActive, timerId, durationInMs])

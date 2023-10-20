@@ -35,11 +35,10 @@ export function Generate() {
   const [runs, setRuns] = useState(0)
   const runsRef = useRef(0)
   const [showModels, setShowModels] = useState(true)
-  // useEffect(() => { runsRef.current = runs },  [runs])
 
   const [communityRoll, setCommunityRoll] = useState<Post[]>([])
 
-  console.log("runs:", runs)
+  
   const { progressPercent, remainingTimeInSec } = useCountdown({
     isActive: isLocked,
     timerId: runs, // everytime we change this, the timer will reset
@@ -92,9 +91,10 @@ export function Generate() {
       const search = current.toString()
       router.push(`${pathname}${search ? `?${search}` : ""}`)
 
+      let newAssetUrl = ""
       try {
-        console.log("starting transition, calling generateAnimation")
-        const newAssetUrl = await generateAnimation({
+        // console.log("starting transition, calling generateAnimation")
+        newAssetUrl = await generateAnimation({
           positivePrompt: promptDraft,
           negativePrompt: "",
           huggingFaceLora,
@@ -106,28 +106,47 @@ export function Generate() {
         })
         setAssetUrl(newAssetUrl)
 
-        try {
-          const post = await postToCommunity({
-            prompt: promptDraft,
-            model: huggingFaceLora,
-            assetUrl: newAssetUrl,
-          })
-          console.log("successfully submitted to the community!", post)
-
-          // now you got a read/write object
-          const current = new URLSearchParams(Array.from(searchParams.entries()))
-          current.set("postId", post.postId.trim())
-          current.set("prompt", post.prompt.trim())
-          current.set("model", post.model.trim())
-          const search = current.toString()
-          router.push(`${pathname}${search ? `?${search}` : ""}`)
-        } catch (err) {
-          console.error(`not a blocker, but we failed to post to the community (reason: ${err})`)
-        }
       } catch (err) {
-        console.error(err)
+        console.log("generation failed! probably just a Gradio failure, so let's just run the round robin again!")
+        
+        try {
+          newAssetUrl = await generateAnimation({
+            positivePrompt: promptDraft,
+            negativePrompt: "",
+            huggingFaceLora,
+            triggerWord,
+            size: "608x416", // "1024x512", // "512x512" // "320x768"
+            nbFrames: 8, // if duration is 1000ms then it means 8 FPS
+            duration: 1000, // in ms
+            steps: 25,
+          })
+          setAssetUrl(newAssetUrl)
+        } catch (err) {
+          console.error(`generation failed again! ${err}`)
+        }
       } finally {
         setLocked(false)
+
+        if (newAssetUrl) {
+          try {
+            const post = await postToCommunity({
+              prompt: promptDraft,
+              model: huggingFaceLora,
+              assetUrl: newAssetUrl,
+            })
+            console.log("successfully submitted to the community!", post)
+
+            // now you got a read/write object
+            const current = new URLSearchParams(Array.from(searchParams.entries()))
+            current.set("postId", post.postId.trim())
+            current.set("prompt", post.prompt.trim())
+            current.set("model", post.model.trim())
+            const search = current.toString()
+            router.push(`${pathname}${search ? `?${search}` : ""}`)
+          } catch (err) {
+            console.error(`not a blocker, but we failed to post to the community (reason: ${err})`)
+          }
+        }
       }
     })
   }
