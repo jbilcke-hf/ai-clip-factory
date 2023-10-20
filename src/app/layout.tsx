@@ -12,8 +12,8 @@ export const metadata: Metadata = {
   // GIF Factory
   // GIF Magic
   // AI GIF Genie
-  title: 'Hotshot-XL Text-to-GIF 🧞',
-  description: 'Hotshot-XL Text-to-GIF 🧞',
+  title: 'AI Clip Factory 🧞',
+  description: 'AI Clip Factory 🧞',
 }
 
 export default function RootLayout({

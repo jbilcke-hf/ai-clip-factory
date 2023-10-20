@@ -8,6 +8,8 @@ import { headingFont } from "@/app/interface/fonts"
 import { useCharacterLimit } from "@/lib/useCharacterLimit"
 import { generateAnimation } from "@/app/server/actions/animation"
 import { postToCommunity } from "@/app/server/actions/community"
+import { useCountdown } from "@/lib/useCountdown"
+import { Countdown } from "../countdown"
 
 export function Generate() {
   const [_isPending, startTransition] = useTransition()
@@ -17,6 +19,13 @@ export function Generate() {
   const [assetUrl, setAssetUrl] = useState("")
   const [isOverSubmitButton, setOverSubmitButton] = useState(false)
 
+  const [runs, setRuns] = useState(0)
+  const { progressPercent, remainingTimeInSec } = useCountdown({
+    timerId: runs, // everytime we change this, the timer will reset
+    durationInSec: 40,
+    onEnd: () => {}
+  })
+  
   const { shouldWarn, colorClass, nbCharsUsed, nbCharsLimits } = useCharacterLimit({
     value: promptDraft,
     nbCharsLimits: 70,
@@ -41,6 +50,7 @@ export function Generate() {
     console.log("handleSubmit:", { isLocked, promptDraft })
     if (isLocked) { return }
     if (!promptDraft) { return }
+    setRuns(runs + 1)
     setLocked(true)
     startTransition(async () => {
       const huggingFaceLora = "KappaNeuro/studio-ghibli-style"
@@ -73,7 +83,7 @@ export function Generate() {
           // foundation
           // replicateLora: "https://pbxt.replicate.delivery/VHU109Irgh6EPJrZ7aVScvadYDqXhlL3izfEAjfhs8Cvz0hRA/trained_model.tar",
 
-          size: "768x320", // "1024x512", // "512x512" // "320x768"
+          size: "672x384", // "1024x512", // "512x512" // "320x768"
 
           nbFrames: 8, // if duration is 1000ms then it means 8 FPS
           duration: 1000, // in ms
@@ -105,6 +115,10 @@ export function Generate() {
       `transition-all duration-300 ease-in-out`,
       //  panel === "play" ? "opacity-1 translate-x-0" : "opacity-0 translate-x-[-1000px] pointer-events-none"
       )}>
+      {isLocked ? <Countdown
+        progressPercent={progressPercent}
+        remainingTimeInSec={remainingTimeInSec}
+      /> : null}
       <div className={cn(
         `flex flex-col md:flex-row`,
         `w-full md:max-w-4xl lg:max-w-5xl xl:max-w-6xl max-h-[80vh]`,

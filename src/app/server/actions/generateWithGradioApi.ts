@@ -15,7 +15,7 @@ export async function generateVideoWithGradioAPI({
   steps = 30,
 }: VideoOptions): Promise<string> {
   console.log(`SEND TO ${gradioApi + (gradioApi.endsWith("/") ? "" : "/") + "api/predict"}:`, [
-    accessToken,
+    // accessToken,
     positivePrompt,
     negativePrompt,
     huggingFaceLora,

@@ -1,4 +1,3 @@
-Find a name (hotshot factory? gipher? gif factory? fun factory?)
 
 Allow browsing some loras
 

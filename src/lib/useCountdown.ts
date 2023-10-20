@@ -7,7 +7,7 @@ export function useCountdown({
   durationInSec,
   onEnd = () => {},
 }: {
-  timerId: string
+  timerId: string | number
   durationInSec: number
   onEnd: () => void
 }) {
