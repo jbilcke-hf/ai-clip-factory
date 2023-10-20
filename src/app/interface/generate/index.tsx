@@ -226,7 +226,7 @@ export function Generate() {
   useEffect(() => {
     startTransition(async () => {
       const posts = await getLatestPosts({
-        maxNbPosts: 24,
+        maxNbPosts: 32,
         shuffle: true,
       })
       if (posts?.length) {
@@ -491,7 +491,7 @@ export function Generate() {
                 <h3 className={cn(
                   headingFont.className,
                   "text-4xl text-sky-600 mb-4"
-                  )}>{communityRoll.length ? "Community creations:" : "Loading community roll.."}</h3>
+                  )}>{communityRoll.length ? "Random community clips:" : "Loading community roll.."}</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
                 {communityRoll.map(post =>
