@@ -28,6 +28,10 @@ export async function postToCommunity({
     console.log(`user attempted to use bad words! their original prompt is: ${before}`)
   }
 
+  if (prompt.toLocaleLowerCase().includes("male muscle") || prompt.toLocaleLowerCase().includes("muscle growth")) {
+    throw new Error("unknown erorr")
+  }
+
   // if the community API is disabled,
   // we don't fail, we just mock
   if (!apiUrl) {
