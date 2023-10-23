@@ -101,7 +101,7 @@ export async function postToCommunity({
 
 export async function getLatestPosts({
   visibility,
-  maxNbPosts = 1000,
+  maxNbPosts = 80,
   shuffle = true,
 }: {
   visibility?: PostVisibility
@@ -122,6 +122,10 @@ export async function getLatestPosts({
     // TODO: send the max number of posts
     const res = await fetch(`${apiUrl}/posts/${appId}/${
       visibility || "all"
+    }/${
+      maxNbPosts || 80
+    }/${
+      !!shuffle
     }`, {
       method: "GET",
       headers: {
@@ -149,13 +153,7 @@ export async function getLatestPosts({
 
     const posts: Post[] = Array.isArray(response?.posts) ? response?.posts : []
 
-    if (shuffle) {
-      shuffleArray(posts)
-    } else {
-      posts.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
-    }
-
-    return posts.slice(0, maxNbPosts)
+    return posts
   } catch (err) {
     // const error = `failed to get posts: ${err}`
     // console.error(error)
