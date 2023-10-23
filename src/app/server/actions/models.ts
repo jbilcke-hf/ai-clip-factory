@@ -22,23 +22,21 @@ export async function getSDXLModels(): Promise<SDXLModel[]> {
   const compatibleModels = content.filter(model => model.is_compatible)
 
   const hardcoded: SDXLModel[] = [
-    /*
-    {
-      "image": "https://jbilcke-hf-ai-clip-factory.hf.space/images/models/sdxl-modern-pixar.jpg",
-      "title": "sdxl-modern-pixar",
-      "repo": "jbilcke-hf/sdxl-modern-pixar",
-      "trigger_word": "modern-pixar",
-      "weights": "pytorch_lora_weights.safetensors",
-      "is_compatible": true,
-      "likes": 0,
-      "downloads": 0
-    },
-    */
     {
       "image": "https://jbilcke-hf-ai-clip-factory.hf.space/images/models/sdxl-cyberpunk-2077.jpg",
       "title": "sdxl-cyberpunk-2077",
       "repo": "jbilcke-hf/sdxl-cyberpunk-2077",
       "trigger_word": "cyberpunk-2077",
+      "weights": "pytorch_lora_weights.safetensors",
+      "is_compatible": true,
+      "likes": 0,
+      "downloads": 0
+    },
+    {
+      "image": "https://jbilcke-hf-ai-clip-factory.hf.space/images/models/sdxl-modern-pixar.jpg",
+      "title": "sdxl-pixar-2",
+      "repo": "jbilcke-hf/sdxl-pixar-2",
+      "trigger_word": "pixar-2",
       "weights": "pytorch_lora_weights.safetensors",
       "is_compatible": true,
       "likes": 0,
