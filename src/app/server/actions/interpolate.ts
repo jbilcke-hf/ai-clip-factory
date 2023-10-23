@@ -58,13 +58,12 @@ export async function interpolate(input: string): Promise<string> {
     if (res.status === 200) {
       try {
         const response = (await res.json()) as any
-        // console.log("response:", response)
         const error = `${response?.error || ""}`
         if (error) {
           throw new Error(error)
         }
         if (response.status === "succeeded") {
-          return response.output[1]
+          return response.output.pop()
         }
       } catch (err) {
         console.error("res.json() error:", err)

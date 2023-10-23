@@ -20,6 +20,10 @@ As a consequence, a model currently defined as default may be replaced at anytim
 
 Right now (2023-10-19) the default model is the base Hotshot-XL (use the official website for faster inference at [https://hotshot.co](https://hotshot.co)).
 
+# Interpolation model
+
+The default model used for interpolation is [ST-MFNet](https://github.com/zsxkib/ST-MFNet)
+
 ## Setup
 
 If you run the app locally you need to create a `.env.local` file 
