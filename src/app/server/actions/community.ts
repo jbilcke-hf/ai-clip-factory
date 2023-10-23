@@ -120,7 +120,7 @@ export async function getLatestPosts({
   try {
     // console.log(`calling GET ${apiUrl}/posts with renderId: ${renderId}`)
     // TODO: send the max number of posts
-    const res = await fetch(`${apiUrl}/posts/${appId}/${
+    const res = await fetch(`${apiUrl}/posts/${appId}/firehose/${
       visibility || "all"
     }/${
       maxNbPosts || 80
