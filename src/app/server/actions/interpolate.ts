@@ -25,7 +25,7 @@ export async function interpolate(input: string): Promise<string> {
     version: replicateModelVersion,
     input: {
       mp4: input,
-      framerate_multiplier: 8,
+      framerate_multiplier: 4,
       keep_original_duration: true,
     }
   })
