@@ -12,9 +12,20 @@ import { getLatestPosts, getPost, postToCommunity } from "@/app/server/actions/c
 import { useCountdown } from "@/lib/useCountdown"
 import { Countdown } from "../countdown"
 import { getSDXLModels } from "@/app/server/actions/models"
-import { Post, SDXLModel } from "@/types"
+import { HotshotImageInferenceSize, Post, QualityLevel, QualityOption, SDXLModel } from "@/types"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { TooltipProvider } from "@radix-ui/react-tooltip"
+
+const qualityOptions = [
+  {
+    level: "low",
+    label: "Low (~ 30 sec)"
+  },
+  {
+    level: "medium",
+    label: "Medium (~90 secs)"
+  }
+] as QualityOption[]
 
 export function Generate() {
   const router = useRouter()
@@ -38,11 +49,12 @@ export function Generate() {
 
   const [communityRoll, setCommunityRoll] = useState<Post[]>([])
 
+  const [qualityLevel, setQualityLevel] = useState<QualityLevel>("low")
   
   const { progressPercent, remainingTimeInSec } = useCountdown({
     isActive: isLocked,
     timerId: runs, // everytime we change this, the timer will reset
-    durationInSec: 50, // it usually takes 40 seconds, but there might be lag
+    durationInSec: 80, // it usually takes 40 seconds, but there might be lag
     onEnd: () => {}
   })
   
@@ -67,7 +79,6 @@ export function Generate() {
   })
 
   const handleSubmit = () => {
-    console.log("handleSubmit:", { isLocked, promptDraft })
     if (isLocked) { return }
     if (!promptDraft) { return }
 
@@ -91,35 +102,33 @@ export function Generate() {
       const search = current.toString()
       router.push(`${pathname}${search ? `?${search}` : ""}`)
 
+      const size: HotshotImageInferenceSize = "608x416"
+
+      // 608x416 @ 25 steps -> 32 seconds
+      const steps = qualityLevel === "low" ? 25 : 35
+
+      const params = {
+        positivePrompt: promptDraft,
+        negativePrompt: "",
+        huggingFaceLora,
+        triggerWord,
+        nbFrames: 10, // if duration is 1000ms then it means 8 FPS
+        duration: 1000, // in ms
+        steps,
+        size
+      }
+
       let newAssetUrl = ""
       try {
         // console.log("starting transition, calling generateAnimation")
-        newAssetUrl = await generateAnimation({
-          positivePrompt: promptDraft,
-          negativePrompt: "",
-          huggingFaceLora,
-          triggerWord,
-          size: "608x416", // "1024x512", // "512x512" // "320x768"
-          nbFrames: 8, // if duration is 1000ms then it means 8 FPS
-          duration: 1000, // in ms
-          steps: 25,
-        })
+        newAssetUrl = await generateAnimation(params)
         setAssetUrl(newAssetUrl)
 
       } catch (err) {
         console.log("generation failed! probably just a Gradio failure, so let's just run the round robin again!")
         
         try {
-          newAssetUrl = await generateAnimation({
-            positivePrompt: promptDraft,
-            negativePrompt: "",
-            huggingFaceLora,
-            triggerWord,
-            size: "608x416", // "1024x512", // "512x512" // "320x768"
-            nbFrames: 8, // if duration is 1000ms then it means 8 FPS
-            duration: 1000, // in ms
-            steps: 25,
-          })
+          newAssetUrl = await generateAnimation(params)
           setAssetUrl(newAssetUrl)
         } catch (err) {
           console.error(`generation failed again! ${err}`)
@@ -304,8 +313,8 @@ export function Generate() {
             `backdrop-blur-lg bg-white/40`,
             `border-2 border-white/10`,
             `items-center`,
-            `space-y-6 md:space-y-8 lg:space-y-12 xl:space-y-16`,
-            `px-3 py-6 md:px-6 md:py-12 xl:px-8 xl:py-16`,
+            `space-y-6 md:space-y-8 lg:space-y-12 xl:space-y-14`,
+            `px-3 py-6 md:px-6 md:py-12 xl:px-8 xl:py-14`,
 
           )}>
             {assetUrl ? <div
@@ -320,7 +329,7 @@ export function Generate() {
                     autoPlay
                     loop
                     src={assetUrl}
-                    className="rounded-md overflow-hidden"
+                    className="rounded-md overflow-hidden md:h-[400px] lg:h-[500px] xl:h-[560px]"
                   /> :
                 <img
                   src={assetUrl}
@@ -415,6 +424,11 @@ export function Generate() {
                 </animated.button>
               </div>
             </div>
+            {/*
+            <div>
+              <p>Generation will take about 32 seconds</p>
+            </div>
+                  */}
 
           </div>
 

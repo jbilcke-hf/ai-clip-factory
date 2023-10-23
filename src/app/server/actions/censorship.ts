@@ -15,7 +15,9 @@ const chickens = [
   "681fea565117808c6dbe002520d2cfeeb3e5c67e68630afb4a453449a9da587b",
   "2f3d913b3db9e15a930aac43eb2d6fe8817db8e4bcf37794bf0227b06b718d1b",
   "922a700b807e4994df82eba2b48a6ac131fe8d8d1035d06b3592d622fb232161",
-  "cb69ee6774eafcc720adb1f689d28acbb9f47998cbea0299ec66a58dedf91c37"
+  "cb69ee6774eafcc720adb1f689d28acbb9f47998cbea0299ec66a58dedf91c37",
+  "bc1d4ab3fd611d6931e7fbaef942555a3a5e836dc7bacbf1939183a96e41a03b",
+  "cf79a5ba29b984a1d35c4cafe917328838af7d9b10e00f4ce91298317212b2b9"
 ]
 
 const ducks = [
@@ -71,6 +73,8 @@ const roasted = [
 ]
 
 const banned = [
+  "3ec2ad1877284220d0515bdb8716c9984143f72f9dcadb5396f0ad8f0ba934fb",
+  "e7db7d13264f1fc484d07e5ae960a702d50ab004055210c9085b6a77a77e182e",
   "03398ec4bdce4de69c76caf151cf3e1db5454208e88da147d607327a56d9ec27",
   "f27229416e1e11b9e7fe28f81fedff6cba2f6cd21eb8ac0d78e74908fbef1bd5",
   "8175b29dc4d1c6d57b9d986f2f9ebbddf1d4ba597a35962ea246e4a5d4d0b850",
@@ -180,7 +184,6 @@ const encode = (list: string[]) => {
 encode([
 ])
 */
-
 
 export const filterOutBadWords = (sentence: string) => {
   if (process.env.ENABLE_CENSORSHIP !== "true") { return sentence }

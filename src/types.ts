@@ -314,3 +314,10 @@ export type SDXLModel = {
   likes: number
   downloads: number
 }
+
+export type QualityLevel = "low" | "medium" | "high"
+
+export type QualityOption = {
+  level: QualityLevel
+  label: string
+}
