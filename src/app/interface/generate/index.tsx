@@ -15,6 +15,7 @@ import { getSDXLModels } from "@/app/server/actions/models"
 import { HotshotImageInferenceSize, Post, QualityLevel, QualityOption, SDXLModel } from "@/types"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { TooltipProvider } from "@radix-ui/react-tooltip"
+import { interpolate } from "@/app/server/actions/interpolate"
 
 const qualityOptions = [
   {
@@ -26,6 +27,8 @@ const qualityOptions = [
     label: "Medium (~90 secs)"
   }
 ] as QualityOption[]
+
+type Stage = "generate" | "interpolate" | "finished"
 
 export function Generate() {
   const router = useRouter()
@@ -49,12 +52,14 @@ export function Generate() {
 
   const [communityRoll, setCommunityRoll] = useState<Post[]>([])
 
+  const [stage, setStage] = useState<Stage>("generate")
+  
   const [qualityLevel, setQualityLevel] = useState<QualityLevel>("low")
   
   const { progressPercent, remainingTimeInSec } = useCountdown({
     isActive: isLocked,
     timerId: runs, // everytime we change this, the timer will reset
-    durationInSec: 80, // it usually takes 40 seconds, but there might be lag
+    durationInSec: /*stage === "interpolate" ? 30 :*/ 80, // it usually takes 40 seconds, but there might be lag
     onEnd: () => {}
   })
   
@@ -83,8 +88,9 @@ export function Generate() {
     if (!promptDraft) { return }
 
     setShowModels(false)
-    setRuns(runs + 1)
+    setRuns(runsRef.current + 1)
     setLocked(true)
+    setStage("generate")
 
     scrollRef.current?.scroll({
       top: 0,
@@ -118,44 +124,73 @@ export function Generate() {
         size
       }
 
-      let newAssetUrl = ""
+      let rawAssetUrl = ""
       try {
         // console.log("starting transition, calling generateAnimation")
-        newAssetUrl = await generateAnimation(params)
-        setAssetUrl(newAssetUrl)
+        rawAssetUrl = await generateAnimation(params)
+
+        if (!rawAssetUrl) {
+          throw new Error("invalid asset url")
+        }
+
+        setAssetUrl(rawAssetUrl)
 
       } catch (err) {
         console.log("generation failed! probably just a Gradio failure, so let's just run the round robin again!")
         
         try {
-          newAssetUrl = await generateAnimation(params)
-          setAssetUrl(newAssetUrl)
+          rawAssetUrl = await generateAnimation(params)
         } catch (err) {
           console.error(`generation failed again! ${err}`)
         }
-      } finally {
+      } 
+
+      if (!rawAssetUrl) {
+        console.log("failed to generate the video, aborting")
         setLocked(false)
+        return
+      }
+      
+      setAssetUrl(rawAssetUrl)
 
-        if (newAssetUrl) {
-          try {
-            const post = await postToCommunity({
-              prompt: promptDraft,
-              model: huggingFaceLora,
-              assetUrl: newAssetUrl,
-            })
-            console.log("successfully submitted to the community!", post)
 
-            // now you got a read/write object
-            const current = new URLSearchParams(Array.from(searchParams.entries()))
-            current.set("postId", post.postId.trim())
-            current.set("prompt", post.prompt.trim())
-            current.set("model", post.model.trim())
-            const search = current.toString()
-            router.push(`${pathname}${search ? `?${search}` : ""}`)
-          } catch (err) {
-            console.error(`not a blocker, but we failed to post to the community (reason: ${err})`)
-          }
+      let assetUrl = rawAssetUrl
+        
+      setStage("interpolate")
+      setRuns(runsRef.current + 1)
+
+      try {
+        assetUrl = await interpolate(rawAssetUrl)
+
+        if (!assetUrl) {
+          throw new Error("invalid interpolated asset url")
         }
+
+        setAssetUrl(assetUrl)
+      } catch (err) {
+        console.log(`failed to interpolate the video, but this is not a blocker: ${err}`)
+      }
+
+      setLocked(false)
+      setStage("generate")
+        
+      try {
+        const post = await postToCommunity({
+          prompt: promptDraft,
+          model: huggingFaceLora,
+          assetUrl,
+        })
+        console.log("successfully submitted to the community!", post)
+
+        // now you got a read/write object
+        const current = new URLSearchParams(Array.from(searchParams.entries()))
+        current.set("postId", post.postId.trim())
+        current.set("prompt", post.prompt.trim())
+        current.set("model", post.model.trim())
+        const search = current.toString()
+        router.push(`${pathname}${search ? `?${search}` : ""}`)
+      } catch (err) {
+        console.error(`not a blocker, but we failed to post to the community (reason: ${err})`)
       }
     })
   }
@@ -323,7 +358,7 @@ export function Generate() {
                 `space-y-3 md:space-y-6`,
                 `items-center`,
               )}>
-                {assetUrl.startsWith("data:video/mp4")
+                {assetUrl.startsWith("data:video/mp4") || assetUrl.endsWith(".mp4")
                  ? <video
                     muted
                     autoPlay
@@ -420,7 +455,10 @@ export function Generate() {
                   disabled={isLocked}
                   onClick={handleSubmit}
                   >
-                  {isLocked ? `Loading..` : "Generate"}
+                  {isLocked
+                    ? (stage === "generate" ? `Generating..` : `Smoothing..`)
+                    : "Generate"
+                  }
                 </animated.button>
               </div>
             </div>
