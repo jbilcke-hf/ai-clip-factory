@@ -1,11 +1,12 @@
 ---
-title: Clip Factory
-emoji: 🤙
-colorFrom: blue
-colorTo: yellow
+title: AI Clip Factory
+emoji: 🧞
+colorFrom: yellow
+colorTo: purple
 sdk: docker
 pinned: true
 app_port: 3000
+disable_embedding: true
 ---
 
 # The AI Clip Factory
