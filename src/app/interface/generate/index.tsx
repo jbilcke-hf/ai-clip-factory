@@ -4,18 +4,21 @@ import { useEffect, useRef, useState, useTransition } from "react"
 import { useSpring, animated } from "@react-spring/web"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
+import { useToast } from "@/components/ui/use-toast"
 import { cn } from "@/lib/utils"
 import { headingFont } from "@/app/interface/fonts"
 import { useCharacterLimit } from "@/lib/useCharacterLimit"
 import { generateAnimation } from "@/app/server/actions/animation"
 import { getLatestPosts, getPost, postToCommunity } from "@/app/server/actions/community"
-import { useCountdown } from "@/lib/useCountdown"
-import { Countdown } from "../countdown"
 import { getSDXLModels } from "@/app/server/actions/models"
 import { HotshotImageInferenceSize, Post, QualityLevel, QualityOption, SDXLModel } from "@/types"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { TooltipProvider } from "@radix-ui/react-tooltip"
 import { interpolate } from "@/app/server/actions/interpolate"
+import { isRateLimitError } from "@/app/server/utils/isRateLimitError"
+import { useCountdown } from "@/lib/useCountdown"
+
+import { Countdown } from "../countdown"
 
 const qualityOptions = [
   {
@@ -34,6 +37,7 @@ export function Generate() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const searchParamsEntries = searchParams ? Array.from(searchParams.entries()) : []
   const [_isPending, startTransition] = useTransition()
 
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -56,6 +60,8 @@ export function Generate() {
   const [stage, setStage] = useState<Stage>("generate")
   
   const [qualityLevel, setQualityLevel] = useState<QualityLevel>("low")
+
+  const { toast } = useToast()
   
   const { progressPercent, remainingTimeInSec } = useCountdown({
     isActive: isLocked,
@@ -103,7 +109,7 @@ export function Generate() {
       const triggerWord =  selectedModel ? selectedModel.trigger_word : "Studio Ghibli Style"
 
       // now you got a read/write object
-      const current = new URLSearchParams(Array.from(searchParams.entries()))
+      const current = new URLSearchParams(searchParamsEntries)
       current.set("prompt", promptDraft)
       current.set("model", huggingFaceLora)
       const search = current.toString()
@@ -114,6 +120,21 @@ export function Generate() {
       // 608x416 @ 25 steps -> 32 seconds
       const steps = qualityLevel === "low" ? 25 : 35
 
+      let key = ""
+      try {
+        const res = await fetch("/api/get-key", {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          cache: 'no-store',
+        })
+        key = await res.text()
+      } catch (err) {
+        console.error("failed to get key, but this is not a blocker")
+      }
+
       const params = {
         positivePrompt: promptDraft,
         negativePrompt: "",
@@ -122,7 +143,8 @@ export function Generate() {
         nbFrames: 10, // if duration is 1000ms then it means 8 FPS
         duration: 1000, // in ms
         steps,
-        size
+        size,
+        key
       }
 
       let rawAssetUrl = ""
@@ -137,11 +159,40 @@ export function Generate() {
         setAssetUrl(rawAssetUrl)
 
       } catch (err) {
+
+        // check the rate limit
+        if (isRateLimitError(err)) {
+          console.error("error, too many requests")
+          toast({
+            title: "You can generate only one video per minute 👀",
+            description: "Please wait a bit before trying again 🤗",
+          })
+          setLocked(false)
+          return
+        } else {
+          toast({
+            title: "We couldn't generate your video 👀",
+            description: "We aere probably over capacity, but you can try again 🤗",
+          })
+        }
+
         console.log("generation failed! probably just a Gradio failure, so let's just run the round robin again!")
         
         try {
           rawAssetUrl = await generateAnimation(params)
         } catch (err) {
+
+          // check the rate limit
+          if (isRateLimitError(err)) {
+            console.error("error, too many requests")
+            toast({
+              title: "Error: the free server is over capacity 👀",
+              description: "You can generate one video per minute 🤗 Please try again in a moment!",
+            })
+            setLocked(false)
+            return
+          }
+          
           console.error(`generation failed again! ${err}`)
         }
       } 
@@ -188,7 +239,7 @@ export function Generate() {
         console.log("successfully submitted to the community!", post)
 
         // now you got a read/write object
-        const current = new URLSearchParams(Array.from(searchParams.entries()))
+        const current = new URLSearchParams(searchParamsEntries)
         current.set("postId", post.postId.trim())
         current.set("prompt", post.prompt.trim())
         current.set("model", post.model.trim())
@@ -212,7 +263,7 @@ export function Generate() {
       }
 
       // now we load URL params
-      const current = new URLSearchParams(Array.from(searchParams.entries()))
+      const current = new URLSearchParams(searchParamsEntries)
 
       // URL query params
       const existingPostId = current.get("postId") || ""
@@ -293,7 +344,7 @@ export function Generate() {
     })
 
     // now you got a read/write object
-    const current = new URLSearchParams(Array.from(searchParams.entries()))
+    const current = new URLSearchParams(searchParamsEntries)
     current.set("postId", post.postId.trim())
     current.set("prompt", post.prompt.trim())
     current.set("model", post.model.trim())

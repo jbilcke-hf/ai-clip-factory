@@ -19,8 +19,8 @@ export default function FirehosePage() {
   const searchParams = useSearchParams()
   const [_isPending, startTransition] = useTransition()
   const [posts, setPosts] = useState<Post[]>([])
-  const moderationKey = (searchParams.get("moderationKey") as string) || ""
-  const limit = Number((searchParams.get("limit") as string) || defaultLimit)
+  const moderationKey =  searchParams ? ((searchParams.get("moderationKey") as string) || "") : ""
+  const limit = searchParams ? (Number((searchParams.get("limit") as string) || defaultLimit)) : defaultLimit
   const [toDelete, setToDelete] = useState<Post>()
 
   useEffect(() => {

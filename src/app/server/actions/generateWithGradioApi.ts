@@ -14,6 +14,7 @@ export async function generateVideoWithGradioAPI({
   duration = 1000,
   steps = 30,
 }: VideoOptions): Promise<string> {
+  /*
   console.log(`SEND TO ${gradioApi + (gradioApi.endsWith("/") ? "" : "/") + "api/predict"}:`, [
     // accessToken,
     positivePrompt,
@@ -25,6 +26,7 @@ export async function generateVideoWithGradioAPI({
     nbFrames,
     duration,
   ])
+  */
   const res = await fetch(gradioApi + (gradioApi.endsWith("/") ? "" : "/") + "api/predict", {
     method: "POST",
     headers: {
@@ -54,9 +56,9 @@ export async function generateVideoWithGradioAPI({
 
   // console.log("data:", data)
   // Recommendation: handle errors
-  if (res.status !== 200) {
+  if (res.status !== 200 || !Array.isArray(data)) {
     // This will activate the closest `error.js` Error Boundary
-    throw new Error('Failed to fetch data')
+    throw new Error(`Failed to fetch data (status: ${res.status})`)
   }
   // console.log("data:", data.slice(0, 50))
 

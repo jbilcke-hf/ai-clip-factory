@@ -302,6 +302,8 @@ export type VideoOptions = {
   duration?: number // in milliseconds
 
   steps?: number
+
+  key?: string // a semi-unique key to prevent abuse from some users
 }
 
 export type SDXLModel = {

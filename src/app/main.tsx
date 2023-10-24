@@ -1,6 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
+import { Toaster } from "@/components/ui/toaster"
 import { paragraphFont } from "@/app/interface/fonts"
 import { Background } from "./interface/background"
 import { Generate } from "./interface/generate"
@@ -17,6 +18,7 @@ export function Main() {
       <Background />
       <Generate />
       <BottomBar />
+      <Toaster />
     </div>
   )
 }
