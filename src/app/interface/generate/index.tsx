@@ -37,6 +37,7 @@ export function Generate() {
   const [_isPending, startTransition] = useTransition()
 
   const scrollRef = useRef<HTMLDivElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   const [isLocked, setLocked] = useState(false)
   const [promptDraft, setPromptDraft] = useState("")
@@ -59,7 +60,7 @@ export function Generate() {
   const { progressPercent, remainingTimeInSec } = useCountdown({
     isActive: isLocked,
     timerId: runs, // everytime we change this, the timer will reset
-    durationInSec: /*stage === "interpolate" ? 30 :*/ 80, // it usually takes 40 seconds, but there might be lag
+    durationInSec: /*stage === "interpolate" ? 30 :*/ 90, // it usually takes 40 seconds, but there might be lag
     onEnd: () => {}
   })
   
@@ -173,7 +174,11 @@ export function Generate() {
 
       setLocked(false)
       setStage("generate")
-        
+      
+      if (process.env.NEXT_PUBLIC_ENABLE_COMMUNITY_SHARING !== "true") {
+        return
+      }
+      
       try {
         const post = await postToCommunity({
           prompt: promptDraft,
@@ -318,6 +323,10 @@ export function Generate() {
     }
   }
 
+  const handleClickPlay = () => {
+    videoRef.current?.play()
+  }
+
   return (
     <div
       ref={scrollRef}
@@ -336,7 +345,7 @@ export function Generate() {
 
       className={cn(
         `flex flex-col`,
-        `w-full md:max-w-4xl lg:max-w-5xl xl:max-w-6xl max-h-[80vh]`,
+        `w-full md:max-w-4xl lg:max-w-5xl xl:max-w-6xl max-h-[85vh]`,
         `space-y-8`,
        //  `transition-all duration-300 ease-in-out`,
       )}>
@@ -360,10 +369,12 @@ export function Generate() {
               )}>
                 {assetUrl.startsWith("data:video/mp4") || assetUrl.endsWith(".mp4")
                  ? <video
+                    ref={videoRef}
                     muted
                     autoPlay
                     loop
                     src={assetUrl}
+                    onClick={handleClickPlay}
                     className="rounded-md overflow-hidden md:h-[400px] lg:h-[500px] xl:h-[560px]"
                   /> :
                 <img

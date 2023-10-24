@@ -13,17 +13,20 @@ import Link from "next/link"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { getLatestPosts } from "@/app/server/actions/community"
 
+const defaultLimit = 200
+
 export default function FirehosePage() {
   const searchParams = useSearchParams()
   const [_isPending, startTransition] = useTransition()
   const [posts, setPosts] = useState<Post[]>([])
   const moderationKey = (searchParams.get("moderationKey") as string) || ""
+  const limit = Number((searchParams.get("limit") as string) || defaultLimit)
   const [toDelete, setToDelete] = useState<Post>()
 
   useEffect(() => {
     startTransition(async () => {
       const newPosts = await getLatestPosts({
-        maxNbPosts: 80,
+        maxNbPosts: isNaN(limit) || !isFinite(limit) ? defaultLimit : limit,
         shuffle: false,
       })
       setPosts(newPosts)
