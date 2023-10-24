@@ -172,7 +172,7 @@ export function Generate() {
         } else {
           toast({
             title: "We couldn't generate your video 👀",
-            description: "We aere probably over capacity, but you can try again 🤗",
+            description: "We are probably over capacity, but you can try again 🤗",
           })
         }
 
@@ -187,7 +187,7 @@ export function Generate() {
             console.error("error, too many requests")
             toast({
               title: "Error: the free server is over capacity 👀",
-              description: "You can generate one video per minute 🤗 Please try again in a moment!",
+              description: "You can generate 2 videos per minute 🤗 Please try again in a moment!",
             })
             setLocked(false)
             return

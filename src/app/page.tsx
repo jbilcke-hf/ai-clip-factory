@@ -1,10 +1,12 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Head from "next/head"
+import Script from "next/script"
+
+import { cn } from "@/lib/utils"
 
 import { Main } from "./main"
-import { cn } from "@/lib/utils"
-import { useEffect, useState } from "react"
 
 // https://nextjs.org/docs/pages/building-your-application/optimizing/fonts 
 
@@ -24,6 +26,16 @@ export default function Page() {
         `bg-gradient-to-r from-cyan-500 to-blue-400`,
         )}>
         {isLoaded && <Main />}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=GTM-NJ2ZZFBX" />
+        <Script id="google-analytics">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+    
+            gtag('config', 'GTM-NJ2ZZFBX');
+          `}
+        </Script>
       </main>
     </>
   )

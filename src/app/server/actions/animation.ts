@@ -19,10 +19,23 @@ const redis = new Redis({
   token: `${process.env.UPSTASH_REDIS_REST_TOKEN || ""}`,
 })
 
-// Create a new ratelimiter for anonymous users, that allows 1 requests per 60 seconds
+// Create a global ratelimiter for all users, that allows 14 requests per 60 seconds
+// 14 is roughly the number of requests that can be handled by the server
+/*
+const rateLimitGlobal = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(14, "60 s"),
+  analytics: true,
+  timeout: 1000,
+  prefix: "production"
+})
+*/
+
+
+// Create a new ratelimiter for anonymous users, that allows 2 requests per minute
 const rateLimitAnons = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(1, "60 s"),
+  limiter: Ratelimit.slidingWindow(2, "60 s"),
   analytics: true,
   timeout: 1000,
   prefix: "production:anon"
@@ -48,16 +61,18 @@ export async function generateAnimation({
 
   console.log(`user ${key.slice(0, 10)} requested "${cropped}${cropped !== positivePrompt ? "..." : ""}"`)
 
+  // const globalRateLimitResult = rateLimitGlobal.limit("global")
+
   // this waits for 3 seconds before failing the request
   // we don't wait more because it is frustrating for someone to wait a failure
-  const rateLimitResult = await rateLimitAnons.limit(key || "anon")
+  const userRateLimitResult = await rateLimitAnons.limit(key || "anon")
   // const rateLimitResult = await rateLimitAnons.blockUntilReady(key, 3_000)
 
   // admin / developers will have this key:
   // eff8e7ca506627fe15dda5e0e512fcaad70b6d520f37cc76597fdb4f2d83a1a3
 
   // result.limit
-  if (!rateLimitResult.success) {
+  if (!userRateLimitResult.success) {
     console.log(`blocking user ${key.slice(0, 10)} who requested "${cropped}${cropped !== positivePrompt ? "..." : ""}"`)
     throw new Error(`Rate Limit Reached`)
   } else {
