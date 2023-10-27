@@ -12,7 +12,7 @@ export async function generateGradio({
   // replicateLora, // not supported yet
   nbFrames = 8,
   duration = 1000,
-  steps = 30,
+  steps = 35,
 }: VideoOptions): Promise<string> {
   /*
   console.log(`SEND TO ${gradioApi + (gradioApi.endsWith("/") ? "" : "/") + "api/predict"}:`, [
