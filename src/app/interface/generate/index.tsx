@@ -119,7 +119,7 @@ export function Generate() {
       const size: HotshotImageInferenceSize = "608x416"
 
       // 608x416 @ 25 steps -> 32 seconds
-      const steps = qualityLevel === "low" ? 25 : 35
+      const steps = qualityLevel === "low" ? 30 : 45
 
       let key = ""
       try {
