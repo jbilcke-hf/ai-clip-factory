@@ -22,7 +22,6 @@ export async function getSDXLModels(): Promise<SDXLModel[]> {
   const compatibleModels = content.filter(model => model.is_compatible)
 
   const hardcoded: SDXLModel[] = [
-    /*
     {
       "image": "https://jbilcke-hf-ai-clip-factory.hf.space/images/models/sdxl-starfield.jpg",
       "title": "sdxl-starfield",
@@ -43,7 +42,6 @@ export async function getSDXLModels(): Promise<SDXLModel[]> {
       "likes": 0,
       "downloads": 0
     },
-    */
     {
       "image": "https://jbilcke-hf-ai-clip-factory.hf.space/images/models/sdxl-cyberpunk-2077.jpg",
       "title": "sdxl-cyberpunk-2077",
