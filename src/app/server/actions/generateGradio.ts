@@ -4,7 +4,7 @@ import { VideoOptions } from "@/types"
 const gradioApi = `${process.env.VIDEO_HOTSHOT_XL_API_GRADIO || ""}`
 const accessToken = `${process.env.AUTH_HOTSHOT_XL_API_GRADIO_ACCESS_TOKEN || ""}`
 
-export async function generateVideoWithGradioAPI({
+export async function generateGradio({
   positivePrompt = "",
   negativePrompt = "",
   size = "512x512",

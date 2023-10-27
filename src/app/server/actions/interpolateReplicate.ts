@@ -1,5 +1,3 @@
-"use server"
-
 import Replicate from "replicate"
 
 import { sleep } from "@/lib/sleep"
@@ -8,7 +6,7 @@ const replicateToken = `${process.env.AUTH_REPLICATE_API_TOKEN || ""}`
 const replicateModel = `${process.env.INTERPOLATION_API_REPLICATE_MODEL || ""}`
 const replicateModelVersion = `${process.env.INTERPOLATION_API_REPLICATE_MODEL_VERSION || ""}`
 
-export async function interpolate(input: string): Promise<string> {
+export async function interpolateReplicate(input: string): Promise<string> {
   if (!replicateToken) {
     throw new Error(`you need to configure your AUTH_REPLICATE_API_TOKEN in order to use interpolation`)
   }

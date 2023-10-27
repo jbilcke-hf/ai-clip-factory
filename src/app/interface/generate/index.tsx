@@ -9,12 +9,13 @@ import { cn } from "@/lib/utils"
 import { headingFont } from "@/app/interface/fonts"
 import { useCharacterLimit } from "@/lib/useCharacterLimit"
 import { generateAnimation } from "@/app/server/actions/animation"
+import { interpolateVideo } from "@/app/server/actions/interpolation"
 import { getLatestPosts, getPost, postToCommunity } from "@/app/server/actions/community"
 import { getSDXLModels } from "@/app/server/actions/models"
 import { HotshotImageInferenceSize, Post, QualityLevel, QualityOption, SDXLModel } from "@/types"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { TooltipProvider } from "@radix-ui/react-tooltip"
-import { interpolate } from "@/app/server/actions/interpolate"
+
 import { isRateLimitError } from "@/app/server/utils/isRateLimitError"
 import { useCountdown } from "@/lib/useCountdown"
 
@@ -212,7 +213,7 @@ export function Generate() {
       setRuns(runsRef.current + 1)
 
       try {
-        assetUrl = await interpolate(rawAssetUrl)
+        assetUrl = await interpolateVideo(rawAssetUrl)
 
         if (!assetUrl) {
           throw new Error("invalid interpolated asset url")

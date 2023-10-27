@@ -5,8 +5,8 @@ import {Redis} from "@upstash/redis"
 
 import { VideoOptions } from "@/types"
 
-import { generateVideoWithGradioAPI } from "./generateWithGradioApi"
-import { generateVideoWithReplicateAPI } from "./generateWithReplicateAPI"
+import { generateGradio } from "./generateGradio"
+import { generateReplicate } from "./generateReplicate"
 import { filterOutBadWords } from "./censorship"
 
 const videoEngine = `${process.env.VIDEO_ENGINE || ""}`
@@ -102,7 +102,7 @@ export async function generateAnimation({
   try {
 
     if (videoEngine === "VIDEO_HOTSHOT_XL_API_REPLICATE") {
-      return generateVideoWithReplicateAPI({
+      return generateReplicate({
         positivePrompt,
         negativePrompt,
         size,
@@ -144,7 +144,7 @@ export async function generateAnimation({
 
       return content
     } else if (videoEngine === "VIDEO_HOTSHOT_XL_API_GRADIO") {
-      return generateVideoWithGradioAPI({
+      return generateGradio({
         positivePrompt,
         negativePrompt,
         size,

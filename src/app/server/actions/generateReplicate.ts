@@ -8,7 +8,7 @@ const replicateToken = `${process.env.AUTH_REPLICATE_API_TOKEN || ""}`
 const replicateModel = `${process.env.VIDEO_HOTSHOT_XL_API_REPLICATE_MODEL || ""}`
 const replicateModelVersion = `${process.env.VIDEO_HOTSHOT_XL_API_REPLICATE_MODEL_VERSION || ""}`
 
-export async function generateVideoWithReplicateAPI({
+export async function generateReplicate({
   positivePrompt = "",
   negativePrompt = "",
   size = "512x512",

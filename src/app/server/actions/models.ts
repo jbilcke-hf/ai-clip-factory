@@ -23,6 +23,26 @@ export async function getSDXLModels(): Promise<SDXLModel[]> {
 
   const hardcoded: SDXLModel[] = [
     {
+      "image": "https://jbilcke-hf-ai-clip-factory.hf.space/images/models/sdxl-starfield.jpg",
+      "title": "sdxl-starfield",
+      "repo": "jbilcke-hf/sdxl-starfield",
+      "trigger_word": "starfield-style",
+      "weights": "pytorch_lora_weights.safetensors",
+      "is_compatible": true,
+      "likes": 0,
+      "downloads": 0
+    },
+    {
+      "image": "https://jbilcke-hf-ai-clip-factory.hf.space/images/models/sdxl-akira.jpg",
+      "title": "sdxl-akira",
+      "repo": "jbilcke-hf/sdxl-akira",
+      "trigger_word": "akira-style",
+      "weights": "pytorch_lora_weights.safetensors",
+      "is_compatible": true,
+      "likes": 0,
+      "downloads": 0
+    },
+    {
       "image": "https://jbilcke-hf-ai-clip-factory.hf.space/images/models/sdxl-cyberpunk-2077.jpg",
       "title": "sdxl-cyberpunk-2077",
       "repo": "jbilcke-hf/sdxl-cyberpunk-2077",
