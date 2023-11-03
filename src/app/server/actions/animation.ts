@@ -19,6 +19,10 @@ const redis = new Redis({
   token: `${process.env.UPSTASH_REDIS_REST_TOKEN || ""}`,
 })
 
+console.log("process.env.OAUTH_CLIENT_ID:", process.env.OAUTH_CLIENT_ID)
+
+console.log("process.env.OPENID_PROVIDER_URL: ", process.env.OPENID_PROVIDER_URL)
+
 // Create a global ratelimiter for all users, that allows 14 requests per 60 seconds
 // 14 is roughly the number of requests that can be handled by the server
 /*

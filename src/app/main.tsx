@@ -19,6 +19,7 @@ export function Main() {
       <Generate />
       <BottomBar />
       <Toaster />
+      {/*<div>Login</div>*/}
     </div>
   )
 }

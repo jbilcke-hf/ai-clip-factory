@@ -3,10 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import Snowfall from "react-snowfall"
 
-import { useStore } from "@/app/store"
-
 export function Background() {
-  const panel = useStore(state => state.panel)
   const [itsRainingFaces, makeItRain] = useState(false)
   const [nbFaces, setNbFaces] = useState(0)
   const nbFacesRef = useRef(0)
@@ -48,7 +45,7 @@ export function Background() {
           height: '100vh',
           transitionProperty: "color",
           transitionDuration: "3000ms",
-          opacity: panel === "join" ? 1 : 0,
+          opacity: 1,
         }}
         radius={[10, 80]}
         speed={[2, 4]}

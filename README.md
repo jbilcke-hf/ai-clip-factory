@@ -7,6 +7,7 @@ sdk: docker
 pinned: true
 app_port: 3000
 disable_embedding: true
+hf_oauth_redirect_path: /api/oauth/callback
 ---
 
 # The AI Clip Factory
