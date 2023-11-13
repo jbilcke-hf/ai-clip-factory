@@ -568,7 +568,7 @@ export function Generate() {
                     src={
                       model.image.startsWith("http")
                       ? model.image
-                      : `https://multimodalart-loratheexplorer.hf.space/file=${model.image}`
+                      : model.image.replace("images/", "/images/models/")
                     }
                     className={cn(
                       `transition-all duration-150 ease-in-out`,
